@@ -33,6 +33,7 @@
             background: var(--white);
             color: var(--gray-dark);
             line-height: 1.7;
+            scroll-behavior: smooth;
         }
         
         .container {
@@ -47,6 +48,9 @@
             border-bottom: 3px solid var(--blue-dark);
             padding: 24px 0;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
         
         .header-content {
@@ -167,11 +171,33 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4);
         }
+
+        /* Integración de App y Mapa */
+        .iframe-wrapper {
+            width: 100%;
+            height: 850px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            margin: 20px 0 40px;
+            background: #fff;
+            border: 1px solid var(--border);
+        }
+        
+        .iframe-wrapper iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .mapa-wrapper {
+            height: 600px;
+        }
         
         /* Stats Section */
         .stats {
             padding: 60px 0;
-            background: var(--off-white);
+            background: var(--white);
         }
         
         .stats-title {
@@ -488,7 +514,8 @@
                     <span>Reporte Inmobiliario MDP</span>
                 </a>
                 <nav>
-                    <a href="#estadisticas">Estadísticas</a>
+                    <a href="#tasador">Tasador</a>
+                    <a href="#mapa">Mapa</a>
                     <a href="#metodologia">Metodología</a>
                     <a href="#contacto">Contacto</a>
                 </nav>
@@ -507,12 +534,32 @@
                         para el mercado inmobiliario de Mar del Plata, basado en el análisis de más de 
                         21.000 propiedades locales.
                     </p>
-                    <a href="https://tasador-mdp.streamlit.app/" target="_blank" class="cta-button">
-                        Tasar mi Propiedad
+                    <a href="#tasador" class="cta-button">
+                        Usar Tasador Ahora
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                             <path d="M4.167 10h11.666M10 4.167L15.833 10 10 15.833" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </a>
+                </div>
+            </div>
+        </section>
+
+        <section id="tasador" class="content-section" style="background: var(--off-white); padding-top: 60px;">
+            <div class="container">
+                <h2 class="section-title">Tasador Interactivo</h2>
+                <p class="section-subtitle">Ingresá los datos de la propiedad para obtener una valuación en tiempo real impulsada por nuestro modelo.</p>
+                <div class="iframe-wrapper">
+                    <iframe src="https://tasador-mdp.streamlit.app/?embed=true" title="Tasador Inmobiliario MDP"></iframe>
+                </div>
+            </div>
+        </section>
+
+        <section id="mapa" class="content-section" style="padding-top: 60px;">
+            <div class="container">
+                <h2 class="section-title">Mapa de Calor del Mercado</h2>
+                <p class="section-subtitle">Explorá visualmente la distribución de valores y oportunidades en los distintos barrios de la ciudad.</p>
+                <div class="iframe-wrapper mapa-wrapper">
+                    <iframe src="https://rdzfacundo.github.io/mapa-mdp/Mapa_Calor_MDP" title="Mapa de Calor MDP"></iframe>
                 </div>
             </div>
         </section>
@@ -686,7 +733,7 @@
             </div>
             
             <div class="footer-bottom">
-                © 2025 Reporte Inmobiliario Mar del Plata. Todos los derechos reservados.
+                © 2026 Reporte Inmobiliario Mar del Plata. Todos los derechos reservados.
             </div>
         </div>
     </footer>
