@@ -110,36 +110,37 @@
         
         /* Container */
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 60px 24px;
         }
         
-        /* Main Grid - Stats + Tasador lado a lado */
-        .main-grid {
-            display: grid;
-            grid-template-columns: 450px 1fr;
-            gap: 32px;
-            margin-bottom: 60px;
-            align-items: start;
-        }
-        
-        @media (max-width: 1024px) {
-            .main-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        /* Stats Widget - Compacto */
-        .stats-widget-compact {
+        /* Stats Widget Section */
+        .stats-widget-section {
             background: white;
             border-radius: 12px;
-            padding: 24px;
+            padding: 40px;
+            margin-bottom: 60px;
             box-shadow: 0 4px 16px rgba(0,0,0,0.08);
         }
         
+        .stats-widget-section h2 {
+            font-size: 32px;
+            color: #5B8B8A;
+            margin-bottom: 32px;
+            text-align: center;
+            font-weight: 700;
+        }
+        
+        /* Widget Styles */
         .widget-container {
             background: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            max-width: 100%;
+            margin: 0 auto;
+            border: 1px solid #f0f0f0;
         }
         
         .controls {
@@ -153,6 +154,7 @@
             border: 1px solid #ccc;
             font-size: 15px;
             width: 100%;
+            max-width: 350px;
             background-color: #fcfcfc;
             cursor: pointer;
             font-weight: 500;
@@ -165,8 +167,21 @@
             border-color: #888;
         }
         
+        .stats-grid {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 15px;
+        }
+        
         .price-list-container {
-            padding: 10px 0;
+            flex: 1;
+            min-width: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 10px;
         }
         
         h3 {
@@ -185,9 +200,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 0;
+            padding: 6px 0;
             border-bottom: 1px dashed #eee;
-            font-size: 14px;
+            font-size: 13px;
         }
         
         .price-label {
@@ -207,41 +222,40 @@
         
         .price-value {
             font-weight: 700;
-            font-size: 16px;
+            font-size: 15px;
             color: #333;
         }
         
         .unit {
-            font-size: 11px;
+            font-size: 10px;
             color: #999;
             font-weight: 400;
             margin-left: 2px;
         }
         
         .chart-box {
-            height: 200px;
+            flex: 1;
+            min-width: 220px;
+            max-width: 280px;
+            height: 220px;
             position: relative;
-            margin: 20px auto;
         }
         
         .general-avg {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         .big-number {
-            font-size: 40px;
+            font-size: 32px;
             font-weight: 800;
             color: #264653;
             line-height: 1;
         }
         
         .subtitle {
-            font-size: 13px;
+            font-size: 12px;
             color: #999;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
         }
         
         #loadingMsg {
@@ -253,125 +267,6 @@
         
         .hidden {
             display: none;
-        }
-        
-        /* Tasador Section */
-        .tasador-section {
-            background: white;
-            border-radius: 12px;
-            padding: 32px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-        }
-        
-        .tasador-header {
-            text-align: center;
-            margin-bottom: 24px;
-        }
-        
-        .tasador-header h2 {
-            font-size: 28px;
-            color: #5B8B8A;
-            margin-bottom: 12px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-        }
-        
-        .tasador-header p {
-            color: #666;
-            font-size: 15px;
-            line-height: 1.7;
-            margin-bottom: 12px;
-        }
-        
-        .tasador-description {
-            background: #f8f9fa;
-            padding: 16px;
-            border-radius: 8px;
-            margin-bottom: 24px;
-            border-left: 4px solid #5B8B8A;
-        }
-        
-        .tasador-description p {
-            font-size: 14px;
-            color: #555;
-            margin: 0;
-            line-height: 1.6;
-        }
-        
-        .iframe-container {
-            position: relative;
-            width: 100%;
-            height: 700px;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
-            background: #f0f0f0;
-        }
-        
-        .iframe-container iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-        
-        .open-fullscreen {
-            text-align: center;
-            margin-top: 16px;
-        }
-        
-        .open-fullscreen a {
-            display: inline-block;
-            padding: 12px 32px;
-            background: #5B8B8A;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            font-size: 14px;
-        }
-        
-        .open-fullscreen a:hover {
-            background: #4a7a79;
-            transform: translateY(-2px);
-        }
-        
-        /* Google Slides Section */
-        .slides-section {
-            background: white;
-            border-radius: 12px;
-            padding: 40px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-            margin-bottom: 60px;
-        }
-        
-        .slides-section h2 {
-            font-size: 32px;
-            color: #5B8B8A;
-            margin-bottom: 24px;
-            text-align: center;
-            font-weight: 700;
-        }
-        
-        .slides-container {
-            position: relative;
-            width: 100%;
-            padding-top: 56.25%; /* 16:9 ratio */
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-        }
-        
-        .slides-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
         }
         
         /* Cards Section */
@@ -412,14 +307,52 @@
             text-align: left;
             border: none;
             padding: 0;
-            text-transform: none;
-            letter-spacing: normal;
         }
         
         .card-content p {
             color: #666;
             line-height: 1.7;
             font-size: 15px;
+        }
+        
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, #5B8B8A 0%, #4a7a79 100%);
+            color: white;
+            padding: 60px 24px;
+            text-align: center;
+            border-radius: 12px;
+            margin-bottom: 60px;
+        }
+        
+        .cta-section h2 {
+            font-size: 36px;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+        
+        .cta-section p {
+            font-size: 18px;
+            margin-bottom: 32px;
+            opacity: 0.95;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            padding: 18px 48px;
+            background: white;
+            color: #5B8B8A;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: 700;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
         }
         
         /* Links Section */
@@ -463,29 +396,6 @@
         
         .link-card a:hover {
             background: #4a7a79;
-        }
-        
-        /* Note Section */
-        .note-section {
-            background: white;
-            padding: 32px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            margin-bottom: 60px;
-        }
-        
-        .note-section p {
-            font-size: 13px;
-            color: #666;
-            line-height: 1.8;
-            margin-bottom: 16px;
-        }
-        
-        .note-section ul {
-            font-size: 13px;
-            color: #666;
-            line-height: 1.8;
-            margin-left: 20px;
         }
         
         /* Footer */
@@ -542,16 +452,6 @@
         }
         
         /* Responsive */
-        @media (max-width: 1024px) {
-            .main-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .iframe-container {
-                height: 600px;
-            }
-        }
-        
         @media (max-width: 768px) {
             .header {
                 height: 300px;
@@ -565,12 +465,8 @@
                 padding: 40px 16px;
             }
             
-            .tasador-section {
-                padding: 20px;
-            }
-            
-            .iframe-container {
-                height: 500px;
+            .stats-widget-section {
+                padding: 24px 16px;
             }
             
             .cards-section {
@@ -603,22 +499,23 @@
     
     <!-- Main Content -->
     <div class="container">
-        <!-- Main Grid: Stats + Tasador lado a lado -->
-        <div class="main-grid" id="inicio">
-            <!-- Stats Widget Compacto -->
-            <div class="stats-widget-compact">
-                <div class="widget-container">
-                    <div id="loadingMsg">⏳ Cargando datos...</div>
-                    <div id="dashboardContent" class="hidden">
-                        <div class="controls">
-                            <select id="zoneSelect" onchange="updateDashboard()">
-                                <option value="">Selecciona una zona...</option>
-                            </select>
-                        </div>
-                        <div class="general-avg">
-                            <div class="subtitle">PRECIO PROMEDIO ZONA</div>
-                            <div id="mainPriceDisplay" class="big-number">---</div>
-                        </div>
+        <!-- Stats Widget -->
+        <section class="stats-widget-section" id="inicio">
+            <h2>Estadísticas del Mercado</h2>
+            
+            <div class="widget-container">
+                <div id="loadingMsg">⏳ Procesando datos del mercado...</div>
+                <div id="dashboardContent" class="hidden">
+                    <div class="controls">
+                        <select id="zoneSelect" onchange="updateDashboard()">
+                            <option value="">Selecciona una zona...</option>
+                        </select>
+                    </div>
+                    <div class="general-avg">
+                        <div class="subtitle">PRECIO PROMEDIO ZONA</div>
+                        <div id="mainPriceDisplay" class="big-number">---</div>
+                    </div>
+                    <div class="stats-grid">
                         <div class="price-list-container">
                             <h3>Desglose por Tipo</h3>
                             <div id="priceList"></div>
@@ -628,52 +525,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Tasador Integrado -->
-            <div class="tasador-section" id="tasador">
-                <div class="tasador-header">
-                    <h2>🏠 TASADOR ONLINE: MAR DEL PLATA</h2>
-                    <p>
-                        Es un valuador de propiedades online. En muy pocos clicks, 
-                        podrás conocer el valor de venta de una propiedad.
-                    </p>
-                </div>
-                <div class="tasador-description">
-                    <p>
-                        Tanto el precio estimado como el rango de precios surgen de un modelo 
-                        algorítmico que considera tanto características intrínsecas del inmueble 
-                        (como la superficie y la cantidad de ambientes) como aquellas relacionadas 
-                        al contexto de la misma (como el barrio y la ubicación).
-                    </p>
-                </div>
-                <div class="iframe-container">
-                    <iframe 
-                        src="https://tasador-mdp.streamlit.app/?embedded=true" 
-                        title="Tasador Inmobiliario MDP"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        loading="lazy">
-                    </iframe>
-                </div>
-                <div class="open-fullscreen">
-                    <a href="https://tasador-mdp.streamlit.app/" target="_blank">
-                        Abrir en Pantalla Completa
-                    </a>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Google Slides Section -->
-        <section class="slides-section">
-            <h2>📊 Reporte Inmobiliario Enero 2026</h2>
-            <div class="slides-container">
-                <iframe 
-                    src="https://docs.google.com/presentation/d/1MduhW5djqhvjRYtoMoWSHWFBeJyPMXVCifEzFb-R5M4/embed?start=true&loop=true&delayms=5000&slide=id.g3940369b8a3_1_507" 
-                    frameborder="0" 
-                    allowfullscreen="true" 
-                    mozallowfullscreen="true" 
-                    webkitallowfullscreen="true">
-                </iframe>
             </div>
         </section>
         
@@ -715,23 +566,43 @@
             </div>
         </div>
         
+        <!-- CTA Tasador -->
+        <section class="cta-section" id="tasador">
+            <h2>TASADOR ONLINE: MAR DEL PLATA</h2>
+            <p>
+                Es un valuador de propiedades online. En muy pocos clicks, podrás conocer el valor 
+                de venta de una propiedad.
+            </p>
+            <a href="https://tasador-mdp.streamlit.app/" target="_blank" class="cta-button">
+                Tasador Online
+            </a>
+        </section>
+        
         <!-- Links adicionales -->
         <div class="links-section">
             <div class="link-card">
-                <h3>🗺️ Mapa de Calor</h3>
+                <h3>Mapa de Calor</h3>
                 <p>Explora los precios por zona de Mar del Plata</p>
                 <a href="https://rdzfacundo.github.io/mapa-mdp/Mapa_Calor_MDP" target="_blank">
                     Ver Mapa
                 </a>
             </div>
+            
+            <div class="link-card">
+                <h3>Reporte Completo</h3>
+                <p>Consulta el análisis detallado del mercado</p>
+                <a href="https://docs.google.com/presentation/d/1MduhW5djqhvjRYtoMoWSHWFBeJyPMXVCifEzFb-R5M4/edit#slide=id.g3940369b8a3_1_507" target="_blank">
+                    Ver Presentación
+                </a>
+            </div>
         </div>
         
         <!-- Nota al pie -->
-        <div class="note-section">
-            <p style="font-weight: 600; margin-bottom: 12px;">
+        <div style="background: white; padding: 32px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+            <p style="font-size: 13px; color: #666; line-height: 1.8; margin-bottom: 16px;">
                 Los datos están basados sobre propiedades que:
             </p>
-            <ul>
+            <ul style="font-size: 13px; color: #666; line-height: 1.8; margin-left: 20px;">
                 <li>Precio mayor a USD 10.000 y menor a 1.500.000</li>
                 <li>M² mayor a 20 y menor a 1.000</li>
             </ul>
