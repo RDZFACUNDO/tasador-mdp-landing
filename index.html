@@ -3,25 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tasador Inmobiliario MDP - Valuación Inteligente</title>
-    <meta name="description" content="Tasador inteligente para propiedades en Mar del Plata. Basado en +21.000 propiedades con precisión del 79%. Machine Learning aplicado al mercado inmobiliario local.">
+    <title>Reporte Inmobiliario - Mar del Plata</title>
+    <meta name="description" content="Inteligencia de datos aplicada al sector inmobiliario de Mar del Plata. Analiza el mercado en tiempo real mediante tasaciones inmediatas, mapas de valor por barrio y reporting constante.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <style>
-        :root {
-            --blue-dark: #1e3a5f;
-            --blue-medium: #2e5c8a;
-            --blue-light: #4a7ba7;
-            --gold: #d4af37;
-            --white: #ffffff;
-            --off-white: #f8f9fa;
-            --gray-dark: #333333;
-            --gray-medium: #666666;
-            --gray-light: #999999;
-            --border: #e0e0e0;
-        }
-        
         * {
             margin: 0;
             padding: 0;
@@ -29,713 +18,823 @@
         }
         
         body {
-            font-family: 'Open Sans', sans-serif;
-            background: var(--white);
-            color: var(--gray-dark);
-            line-height: 1.7;
-            scroll-behavior: smooth;
+            font-family: 'Roboto', sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
         }
         
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
-        
-        /* Header */
-        header {
-            background: var(--white);
-            border-bottom: 3px solid var(--blue-dark);
-            padding: 24px 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-        
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 24px;
-            flex-wrap: wrap;
-        }
-        
-        .logo {
-            font-family: 'Merriweather', serif;
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--blue-dark);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: var(--blue-dark);
-            color: var(--white);
-            border-radius: 4px;
+        /* Header con Banner */
+        .header {
+            position: relative;
+            height: 400px;
+            background: url('./images/Banner.png') center center/cover;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            text-align: center;
+            color: white;
+            overflow: hidden;
         }
         
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 2;
+            max-width: 900px;
+            padding: 0 24px;
+        }
+        
+        .header h1 {
+            font-size: clamp(32px, 6vw, 56px);
+            font-weight: 700;
+            margin-bottom: 16px;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: clamp(16px, 3vw, 20px);
+            font-weight: 300;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.7;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.3);
+        }
+        
+        /* Nav */
         nav {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        nav ul {
+            list-style: none;
             display: flex;
-            gap: 32px;
-            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        nav li {
+            padding: 0;
         }
         
         nav a {
-            color: var(--gray-dark);
+            display: block;
+            padding: 20px 32px;
+            color: #5B8B8A;
             text-decoration: none;
-            font-size: 15px;
-            font-weight: 600;
-            transition: color 0.3s ease;
-            border-bottom: 2px solid transparent;
-            padding-bottom: 4px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
         }
         
         nav a:hover {
-            color: var(--blue-dark);
-            border-bottom-color: var(--gold);
+            background: #f0f0f0;
+            border-bottom-color: #5B8B8A;
         }
         
-        /* Hero Section */
-        .hero {
-            background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue-medium) 100%);
-            color: var(--white);
-            padding: 80px 0;
-            position: relative;
-        }
-        
-        .hero::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--gold);
-        }
-        
-        .hero-content {
-            max-width: 800px;
+        /* Container */
+        .container {
+            max-width: 1200px;
             margin: 0 auto;
+            padding: 60px 24px;
+        }
+        
+        /* Stats Widget Section */
+        .stats-widget-section {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            margin-bottom: 60px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        }
+        
+        .stats-widget-section h2 {
+            font-size: 32px;
+            color: #5B8B8A;
+            margin-bottom: 32px;
+            text-align: center;
+            font-weight: 700;
+        }
+        
+        /* Widget Styles */
+        .widget-container {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            max-width: 100%;
+            margin: 0 auto;
+            border: 1px solid #f0f0f0;
+        }
+        
+        .controls {
+            margin-bottom: 20px;
             text-align: center;
         }
         
-        .hero-title {
-            font-family: 'Merriweather', serif;
-            font-size: clamp(32px, 5vw, 52px);
+        select {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 15px;
+            width: 100%;
+            max-width: 350px;
+            background-color: #fcfcfc;
+            cursor: pointer;
+            font-weight: 500;
+            color: #333;
+            outline: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        select:hover {
+            border-color: #888;
+        }
+        
+        .stats-grid {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .price-list-container {
+            flex: 1;
+            min-width: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 10px;
+        }
+        
+        h3 {
+            margin: 0 0 15px 0;
+            font-size: 13px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             font-weight: 700;
-            line-height: 1.2;
-            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
         }
         
-        .hero-subtitle {
-            font-size: 20px;
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px dashed #eee;
+            font-size: 13px;
+        }
+        
+        .price-label {
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+            display: inline-block;
+        }
+        
+        .price-value {
+            font-weight: 700;
+            font-size: 15px;
+            color: #333;
+        }
+        
+        .unit {
+            font-size: 10px;
+            color: #999;
+            font-weight: 400;
+            margin-left: 2px;
+        }
+        
+        .chart-box {
+            flex: 1;
+            min-width: 220px;
+            max-width: 280px;
+            height: 220px;
+            position: relative;
+        }
+        
+        .general-avg {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .big-number {
+            font-size: 32px;
+            font-weight: 800;
+            color: #264653;
+            line-height: 1;
+        }
+        
+        .subtitle {
+            font-size: 12px;
+            color: #999;
+        }
+        
+        #loadingMsg {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            padding: 20px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* Cards Section */
+        .cards-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 32px;
+            margin-bottom: 60px;
+        }
+        
+        .property-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+        
+        .property-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+        
+        .property-card img {
+            width: 100%;
+            height: 240px;
+            object-fit: cover;
+        }
+        
+        .card-content {
+            padding: 24px;
+        }
+        
+        .card-content h3 {
+            font-size: 22px;
+            color: #5B8B8A;
+            margin-bottom: 12px;
+            text-align: left;
+            border: none;
+            padding: 0;
+        }
+        
+        .card-content p {
+            color: #666;
+            line-height: 1.7;
+            font-size: 15px;
+        }
+        
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, #5B8B8A 0%, #4a7a79 100%);
+            color: white;
+            padding: 60px 24px;
+            text-align: center;
+            border-radius: 12px;
+            margin-bottom: 60px;
+        }
+        
+        .cta-section h2 {
+            font-size: 36px;
             margin-bottom: 16px;
-            color: var(--gold);
-            font-weight: 600;
+            font-weight: 700;
         }
         
-        .hero-description {
+        .cta-section p {
             font-size: 18px;
-            line-height: 1.8;
-            margin-bottom: 40px;
+            margin-bottom: 32px;
             opacity: 0.95;
         }
         
         .cta-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 16px 40px;
-            background: var(--gold);
-            color: var(--blue-dark);
+            display: inline-block;
+            padding: 18px 48px;
+            background: white;
+            color: #5B8B8A;
             text-decoration: none;
-            font-size: 17px;
+            font-size: 18px;
             font-weight: 700;
-            border-radius: 4px;
+            border-radius: 8px;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
         }
         
         .cta-button:hover {
-            background: #c9a232;
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4);
-        }
-
-        /* Integración de App y Mapa */
-        .iframe-wrapper {
-            width: 100%;
-            height: 850px;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-            margin: 20px 0 40px;
-            background: #fff;
-            border: 1px solid var(--border);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
         }
         
-        .iframe-wrapper iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        .mapa-wrapper {
-            height: 600px;
-        }
-        
-        /* Stats Section */
-        .stats {
-            padding: 60px 0;
-            background: var(--white);
-        }
-        
-        .stats-title {
-            font-family: 'Merriweather', serif;
-            font-size: 32px;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 48px;
-            color: var(--blue-dark);
-        }
-        
-        .stats-grid {
+        /* Links Section */
+        .links-section {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 32px;
+            gap: 24px;
+            margin-bottom: 60px;
         }
         
-        .stat-card {
+        .link-card {
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
             text-align: center;
-            padding: 40px 24px;
-            background: var(--white);
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-        
-        .stat-card:hover {
-            border-color: var(--blue-medium);
             box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-            transform: translateY(-4px);
-        }
-        
-        .stat-number {
-            display: block;
-            font-family: 'Merriweather', serif;
-            font-size: 48px;
-            font-weight: 700;
-            color: var(--blue-dark);
-            margin-bottom: 12px;
-        }
-        
-        .stat-label {
-            color: var(--gray-medium);
-            font-size: 16px;
-            font-weight: 600;
-        }
-        
-        /* Content Section */
-        .content-section {
-            padding: 80px 0;
-        }
-        
-        .section-title {
-            font-family: 'Merriweather', serif;
-            font-size: 36px;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 16px;
-            color: var(--blue-dark);
-        }
-        
-        .section-subtitle {
-            text-align: center;
-            font-size: 18px;
-            color: var(--gray-medium);
-            max-width: 700px;
-            margin: 0 auto 60px;
-            line-height: 1.8;
-        }
-        
-        .content-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 40px;
-        }
-        
-        .content-card {
-            background: var(--white);
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            padding: 40px 32px;
             transition: all 0.3s ease;
         }
         
-        .content-card:hover {
-            border-color: var(--blue-medium);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+        .link-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
         }
         
-        .content-icon {
-            width: 64px;
-            height: 64px;
-            background: var(--blue-dark);
-            color: var(--white);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            margin-bottom: 24px;
-        }
-        
-        .content-card h3 {
-            font-family: 'Merriweather', serif;
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 16px;
-            color: var(--blue-dark);
-        }
-        
-        .content-card p {
-            color: var(--gray-medium);
-            line-height: 1.8;
-            margin-bottom: 16px;
-        }
-        
-        .content-detail {
-            padding-top: 16px;
-            border-top: 1px solid var(--border);
-            font-size: 14px;
-            color: var(--gray-dark);
-        }
-        
-        .content-detail strong {
-            color: var(--blue-dark);
-            font-weight: 700;
-        }
-        
-        /* Methodology Section */
-        .methodology {
-            background: var(--off-white);
-            padding: 80px 0;
-        }
-        
-        .methodology-content {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        
-        .methodology h2 {
-            font-family: 'Merriweather', serif;
-            font-size: 36px;
-            font-weight: 700;
-            margin-bottom: 32px;
-            color: var(--blue-dark);
-            text-align: center;
-        }
-        
-        .methodology-text {
-            background: var(--white);
-            padding: 40px;
-            border-radius: 8px;
-            border: 2px solid var(--border);
-            margin-bottom: 32px;
-        }
-        
-        .methodology-text h3 {
+        .link-card h3 {
             font-size: 20px;
-            font-weight: 700;
+            color: #5B8B8A;
             margin-bottom: 16px;
-            color: var(--blue-dark);
         }
         
-        .methodology-text ul {
-            list-style: none;
-            padding: 0;
+        .link-card a {
+            display: inline-block;
+            padding: 12px 32px;
+            background: #5B8B8A;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
         
-        .methodology-text li {
-            padding: 12px 0 12px 32px;
-            position: relative;
-            color: var(--gray-dark);
-        }
-        
-        .methodology-text li::before {
-            content: '✓';
-            position: absolute;
-            left: 0;
-            color: var(--gold);
-            font-weight: 700;
-            font-size: 18px;
-        }
-        
-        /* Disclaimer */
-        .disclaimer {
-            padding: 60px 0;
-        }
-        
-        .disclaimer-box {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 40px;
-            background: #fff9e6;
-            border: 2px solid var(--gold);
-            border-radius: 8px;
-        }
-        
-        .disclaimer-box h3 {
-            font-family: 'Merriweather', serif;
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--blue-dark);
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .disclaimer-box p {
-            color: var(--gray-dark);
-            line-height: 1.8;
-            font-size: 15px;
+        .link-card a:hover {
+            background: #4a7a79;
         }
         
         /* Footer */
         footer {
-            background: var(--blue-dark);
-            color: var(--white);
-            padding: 60px 0 30px;
+            background: #2c3e50;
+            color: white;
+            padding: 60px 24px 30px;
         }
         
         .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 48px;
-            margin-bottom: 48px;
+            margin-bottom: 40px;
+        }
+        
+        .footer-logo {
+            text-align: center;
+        }
+        
+        .footer-logo img {
+            max-width: 200px;
+            height: auto;
+            margin-bottom: 16px;
         }
         
         .footer-section h4 {
-            font-family: 'Merriweather', serif;
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 20px;
-            color: var(--gold);
+            font-size: 18px;
+            margin-bottom: 16px;
+            color: #5B8B8A;
         }
         
         .footer-section p,
         .footer-section a {
             color: rgba(255, 255, 255, 0.8);
             text-decoration: none;
-            line-height: 1.8;
             display: block;
+            margin-bottom: 8px;
             transition: color 0.3s ease;
         }
         
         .footer-section a:hover {
-            color: var(--gold);
+            color: #5B8B8A;
         }
         
         .footer-bottom {
             text-align: center;
-            padding-top: 32px;
+            padding-top: 24px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             color: rgba(255, 255, 255, 0.6);
             font-size: 14px;
         }
         
-        .linkedin-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 24px;
-            background: #0077b5;
-            border-radius: 4px;
-            color: var(--white);
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            margin-top: 16px;
-        }
-        
-        .linkedin-badge:hover {
-            background: #006399;
-            transform: translateY(-2px);
-        }
-        
         /* Responsive */
         @media (max-width: 768px) {
-            .hero {
-                padding: 60px 0;
+            .header {
+                height: 300px;
             }
             
-            .hero-title {
-                font-size: 32px;
+            nav a {
+                padding: 16px 20px;
             }
             
-            .stats-grid,
-            .content-grid {
+            .container {
+                padding: 40px 16px;
+            }
+            
+            .stats-widget-section {
+                padding: 24px 16px;
+            }
+            
+            .cards-section {
                 grid-template-columns: 1fr;
-            }
-            
-            nav {
-                gap: 16px;
-            }
-            
-            .header-content {
-                justify-content: center;
-                text-align: center;
-            }
-            
-            .footer-content {
-                grid-template-columns: 1fr;
-                text-align: center;
             }
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="container">
-            <div class="header-content">
-                <a href="#" class="logo">
-                    <div class="logo-icon">🏠</div>
-                    <span>Reporte Inmobiliario MDP</span>
-                </a>
-                <nav>
-                    <a href="#tasador">Tasador</a>
-                    <a href="#mapa">Mapa</a>
-                    <a href="#metodologia">Metodología</a>
-                    <a href="#contacto">Contacto</a>
-                </nav>
-            </div>
+    <!-- Header con Banner -->
+    <header class="header">
+        <div class="header-content">
+            <h1>REPORTE INMOBILIARIO MDP</h1>
+            <p>
+                Inteligencia de datos aplicada al sector inmobiliario de Mar del Plata. 
+                Analiza el mercado en tiempo real mediante tasaciones inmediatas, mapas de valor 
+                por barrio, monitoreo y reporting constante de la oferta local.
+            </p>
         </div>
     </header>
     
-    <main>
-        <section class="hero">
-            <div class="container">
-                <div class="hero-content">
-                    <div class="hero-subtitle">Tasador Inteligente MDP</div>
-                    <h1 class="hero-title">Valuación de Propiedades con Machine Learning</h1>
-                    <p class="hero-description">
-                        Este tasador utiliza un modelo de Machine Learning desarrollado específicamente 
-                        para el mercado inmobiliario de Mar del Plata, basado en el análisis de más de 
-                        21.000 propiedades locales.
-                    </p>
-                    <a href="#tasador" class="cta-button">
-                        Usar Tasador Ahora
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <path d="M4.167 10h11.666M10 4.167L15.833 10 10 15.833" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </a>
-                </div>
-            </div>
-        </section>
-
-        <section id="tasador" class="content-section" style="background: var(--off-white); padding-top: 60px;">
-            <div class="container">
-                <h2 class="section-title">Tasador Interactivo</h2>
-                <p class="section-subtitle">Ingresá los datos de la propiedad para obtener una valuación en tiempo real impulsada por nuestro modelo.</p>
-                <div class="iframe-wrapper">
-                    <iframe src="https://tasador-mdp.streamlit.app/?embed=true" title="Tasador Inmobiliario MDP"></iframe>
-                </div>
-            </div>
-        </section>
-
-        <section id="mapa" class="content-section" style="padding-top: 60px;">
-            <div class="container">
-                <h2 class="section-title">Mapa de Calor del Mercado</h2>
-                <p class="section-subtitle">Explorá visualmente la distribución de valores y oportunidades en los distintos barrios de la ciudad.</p>
-                <div class="iframe-wrapper mapa-wrapper">
-                    <iframe src="https://rdzfacundo.github.io/mapa-mdp/Mapa_Calor_MDP" title="Mapa de Calor MDP"></iframe>
-                </div>
-            </div>
-        </section>
-        
-        <section class="stats" id="estadisticas">
-            <div class="container">
-                <h2 class="stats-title">Datos del Modelo</h2>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <span class="stat-number">+21.000</span>
-                        <span class="stat-label">Propiedades Analizadas</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-number">79.05%</span>
-                        <span class="stat-label">Precisión Estadística (R²)</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-number">21.65%</span>
-                        <span class="stat-label">Desvío Promedio</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
-        <section class="content-section">
-            <div class="container">
-                <h2 class="section-title">Variables Clave del Algoritmo</h2>
-                <p class="section-subtitle">
-                    El modelo de Random Forest prioriza estos factores para generar 
-                    estimaciones precisas del valor de mercado
-                </p>
-                
-                <div class="content-grid">
-                    <div class="content-card">
-                        <div class="content-icon">📐</div>
-                        <h3>Superficie Total</h3>
-                        <p>
-                            El tamaño de la propiedad es el factor principal en la valuación. 
-                            El modelo analiza tanto superficie cubierta como total del terreno.
-                        </p>
-                        <div class="content-detail">
-                            <strong>Impacto:</strong> Factor determinante en el precio
-                        </div>
-                    </div>
-                    
-                    <div class="content-card">
-                        <div class="content-icon">📍</div>
-                        <h3>Ubicación Exacta</h3>
-                        <p>
-                            Coordenadas geográficas precisas permiten evaluar la zona, 
-                            proximidad a servicios y características del barrio.
-                        </p>
-                        <div class="content-detail">
-                            <strong>Datos:</strong> Coordenadas GPS de cada propiedad
-                        </div>
-                    </div>
-                    
-                    <div class="content-card">
-                        <div class="content-icon">🏘️</div>
-                        <h3>Ambientes y Baños</h3>
-                        <p>
-                            La cantidad de ambientes y baños son indicadores clave de 
-                            la funcionalidad y confort de la propiedad.
-                        </p>
-                        <div class="content-detail">
-                            <strong>Análisis:</strong> Distribución óptima por tipo de propiedad
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
-        <section class="methodology" id="metodologia">
-            <div class="container">
-                <div class="methodology-content">
-                    <h2>Metodología del Modelo</h2>
-                    
-                    <div class="methodology-text">
-                        <h3>Entrenamiento del Algoritmo</h3>
-                        <ul>
-                            <li>Análisis de más de 21.000 propiedades del mercado local</li>
-                            <li>Modelo basado en Random Forest (Machine Learning)</li>
-                            <li>Precisión estadística (R²) del 79.05%</li>
-                            <li>Actualización continua con datos de mercado</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="methodology-text">
-                        <h3>Variables Consideradas</h3>
-                        <ul>
-                            <li>Superficie total de la propiedad</li>
-                            <li>Ubicación geográfica exacta (coordenadas GPS)</li>
-                            <li>Cantidad de ambientes</li>
-                            <li>Cantidad de baños</li>
-                            <li>Características adicionales del inmueble</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="methodology-text">
-                        <h3>Interpretación de Resultados</h3>
-                        <ul>
-                            <li>El desvío promedio del modelo es del 21.65%</li>
-                            <li>El valor puede oscilar según factores cualitativos</li>
-                            <li>Estado de conservación no capturado por el modelo</li>
-                            <li>Vistas y calidad de terminaciones pueden variar el precio</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
-        <section class="disclaimer">
-            <div class="container">
-                <div class="disclaimer-box">
-                    <h3>
-                        <span style="font-size: 24px;">⚠️</span>
-                        Aviso Importante
-                    </h3>
-                    <p>
-                        <strong>Esta herramienta es una referencia estadística de mercado y no reemplaza 
-                        la tasación presencial de un profesional matriculado.</strong> El desvío promedio del 
-                        21.65% significa que el valor final de cada propiedad puede oscilar en ese porcentaje 
-                        respecto al precio sugerido, dependiendo de factores cualitativos únicos (como estado 
-                        de conservación, las vistas que posea o calidad de las terminaciones) que el modelo 
-                        no puede capturar de forma automática.
-                    </p>
-                </div>
-            </div>
-        </section>
-    </main>
+    <!-- Nav -->
+    <nav>
+        <ul>
+            <li><a href="#inicio">Reporte Inmobiliario</a></li>
+            <li><a href="https://rdzfacundo.github.io/mapa-mdp/Mapa_Calor_MDP" target="_blank">Mapa de calor</a></li>
+            <li><a href="#tasador">Tasador</a></li>
+        </ul>
+    </nav>
     
-    <footer id="contacto">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h4>Reporte Inmobiliario MDP</h4>
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Stats Widget -->
+        <section class="stats-widget-section" id="inicio">
+            <h2>Estadísticas del Mercado</h2>
+            
+            <div class="widget-container">
+                <div id="loadingMsg">⏳ Procesando datos del mercado...</div>
+                <div id="dashboardContent" class="hidden">
+                    <div class="controls">
+                        <select id="zoneSelect" onchange="updateDashboard()">
+                            <option value="">Selecciona una zona...</option>
+                        </select>
+                    </div>
+                    <div class="general-avg">
+                        <div class="subtitle">PRECIO PROMEDIO ZONA</div>
+                        <div id="mainPriceDisplay" class="big-number">---</div>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="price-list-container">
+                            <h3>Desglose por Tipo</h3>
+                            <div id="priceList"></div>
+                        </div>
+                        <div class="chart-box">
+                            <canvas id="myRealEstateChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Property Cards -->
+        <div class="cards-section">
+            <div class="property-card">
+                <img src="./images/Edificio.png" alt="Departamentos">
+                <div class="card-content">
+                    <h3>Departamentos: $1.996/m²</h3>
                     <p>
-                        Tasador inteligente desarrollado específicamente para el mercado 
-                        inmobiliario de Mar del Plata.
+                        El departamento monoambiente medio de 25m² se vende por $2.183 ($54.575 total). 
+                        El departamento medio de 2 ambientes y 45m² se vende por $2.086 ($93.870 total). 
+                        El departamento medio de 3 ambientes y 70m² se vende por $1.807 ($126.490 total).
                     </p>
-                    <p style="margin-top: 16px;">
-                        Basado en Machine Learning y análisis de +21.000 propiedades locales.
-                    </p>
-                </div>
-                
-                <div class="footer-section">
-                    <h4>Desarrollo</h4>
-                    <p>Facundo Manzo Rodriguez</p>
-                    <p style="margin-top: 12px;">
-                        <strong>Email:</strong><br>
-                        <a href="mailto:rodriguezfacundomdp@gmail.com">
-                            rodriguezfacundomdp@gmail.com
-                        </a>
-                    </p>
-                    <p style="margin-top: 12px;">
-                        <strong>Teléfono:</strong><br>
-                        <a href="tel:+542236233628">223-623-3628</a>
-                    </p>
-                </div>
-                
-                <div class="footer-section">
-                    <h4>Conectar</h4>
-                    <p>Conocé más sobre el desarrollo y metodología</p>
-                    <a href="http://www.linkedin.com/in/facundo-rodriguez-83369730a" target="_blank" class="linkedin-badge">
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M4.5 2.5A2 2 0 012.5 4.5v11A2 2 0 014.5 17.5h11a2 2 0 002-2v-11a2 2 0 00-2-2h-11zm0 1.5h11a.5.5 0 01.5.5v11a.5.5 0 01-.5.5h-11a.5.5 0 01-.5-.5v-11a.5.5 0 01.5-.5zm1.75 2a1.25 1.25 0 100 2.5 1.25 1.25 0 000-2.5zm5.5.5a2.5 2.5 0 00-2.5 2.5v4.5h1.5v-4.5a1 1 0 112 0v4.5h1.5v-4.5a2.5 2.5 0 00-2.5-2.5zM5 9.5v5h1.5v-5H5z"/>
-                        </svg>
-                        LinkedIn
-                    </a>
                 </div>
             </div>
             
-            <div class="footer-bottom">
-                © 2026 Reporte Inmobiliario Mar del Plata. Todos los derechos reservados.
+            <div class="property-card">
+                <img src="./images/Chalet.png" alt="Casas">
+                <div class="card-content">
+                    <h3>El precio promedio de las casas es de $174.659</h3>
+                    <p>
+                        La casa promedio de 3 dormitorios tiene un valor de $186.977. 
+                        La casa promedio de 4 dormitorios tiene un valor de $240.053.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="property-card">
+                <img src="./images/Terreno.png" alt="Terrenos">
+                <div class="card-content">
+                    <h3>El precio promedio de los terrenos es de $169/m²</h3>
+                    <p>
+                        El barrio con mayor cantidad de terrenos publicados es "Los Acantilados" con un 
+                        precio medio de $58.367, seguido por "Las Sierras de los Padres" con un precio 
+                        medio de $53.510.
+                    </p>
+                </div>
             </div>
         </div>
+        
+        <!-- CTA Tasador -->
+        <section class="cta-section" id="tasador">
+            <h2>TASADOR ONLINE: MAR DEL PLATA</h2>
+            <p>
+                Es un valuador de propiedades online. En muy pocos clicks, podrás conocer el valor 
+                de venta de una propiedad.
+            </p>
+            <a href="https://tasador-mdp.streamlit.app/" target="_blank" class="cta-button">
+                Tasador Online
+            </a>
+        </section>
+        
+        <!-- Links adicionales -->
+        <div class="links-section">
+            <div class="link-card">
+                <h3>Mapa de Calor</h3>
+                <p>Explora los precios por zona de Mar del Plata</p>
+                <a href="https://rdzfacundo.github.io/mapa-mdp/Mapa_Calor_MDP" target="_blank">
+                    Ver Mapa
+                </a>
+            </div>
+            
+            <div class="link-card">
+                <h3>Reporte Completo</h3>
+                <p>Consulta el análisis detallado del mercado</p>
+                <a href="https://docs.google.com/presentation/d/1MduhW5djqhvjRYtoMoWSHWFBeJyPMXVCifEzFb-R5M4/edit#slide=id.g3940369b8a3_1_507" target="_blank">
+                    Ver Presentación
+                </a>
+            </div>
+        </div>
+        
+        <!-- Nota al pie -->
+        <div style="background: white; padding: 32px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+            <p style="font-size: 13px; color: #666; line-height: 1.8; margin-bottom: 16px;">
+                Los datos están basados sobre propiedades que:
+            </p>
+            <ul style="font-size: 13px; color: #666; line-height: 1.8; margin-left: 20px;">
+                <li>Precio mayor a USD 10.000 y menor a 1.500.000</li>
+                <li>M² mayor a 20 y menor a 1.000</li>
+            </ul>
+            <p style="font-size: 12px; color: #999; margin-top: 16px; font-style: italic;">
+                *valores expresados en dólares<br>
+                **La superficie de las casas contempla el tamaño del terreno, lo que disminuye su valor por m².
+            </p>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">
+                <img src="./images/Logo_4.png" alt="Reporte Inmobiliario MDP">
+            </div>
+            
+            <div class="footer-section">
+                <h4>Contacto</h4>
+                <p><strong>Desarrollo por:</strong><br>Facundo Manzo Rodriguez</p>
+                <a href="mailto:rodriguezfacundomdp@gmail.com">rodriguezfacundomdp@gmail.com</a>
+                <a href="tel:+542236233628">223-623-3628</a>
+            </div>
+            
+            <div class="footer-section">
+                <h4>Conectar</h4>
+                <a href="http://www.linkedin.com/in/facundo-rodriguez-83369730a" target="_blank">
+                    LinkedIn
+                </a>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            © 2025 Reporte Inmobiliario Mar del Plata. Todos los derechos reservados.
+        </div>
     </footer>
+    
+    <!-- Widget Script -->
+    <script>
+        const URL_DATOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTI8h4Fd4OZ70B3ZLFTd6MFkya_ZiMOrHBaYOEcowx6A1TAo3yVyfoSYJPqveCX52DelILBeUhHjzdl/pub?gid=352634514&single=true&output=csv";
+        
+        Chart.register(ChartDataLabels);
+        let processedData = {};
+        let myChart = null;
+        const chartLabels = ['Departamentos', 'Casas', 'PHs', 'Locales'];
+        const chartColors = ['#2a9d8f', '#e9c46a', '#f4a261', '#e76f51'];
+        
+        const formatCurrency = (num) => num.toLocaleString('es-AR', {maximumFractionDigits: 0});
+        
+        function cleanParse(valStr) {
+            if (!valStr) return 0;
+            let clean = valStr.toString().replace(/["$a-zA-Z\s]/g, '');
+            if (clean.indexOf(',') > -1) {
+                clean = clean.replace(/\./g, '');
+                clean = clean.replace(',', '.');
+            } else {
+                clean = clean.replace(/\./g, '');
+            }
+            return parseFloat(clean) || 0;
+        }
+        
+        async function fetchData() {
+            try {
+                const response = await fetch(URL_DATOS);
+                if (!response.ok) throw new Error("Error de red");
+                const dataText = await response.text();
+                
+                const rows = dataText.split('\n').slice(1);
+                const rawInput = rows.map(row => {
+                    const cols = row.split(',');
+                    if (cols.length < 7) return null;
+                    return {
+                        loc: cols[0].trim(),
+                        type: cols[1].trim(),
+                        val: cleanParse(cols[5]),
+                        area: cleanParse(cols[6])
+                    };
+                }).filter(item => item !== null);
+                
+                processData(rawInput);
+                initDashboard();
+                document.getElementById('loadingMsg').style.display = 'none';
+                document.getElementById('dashboardContent').classList.remove('hidden');
+            } catch (error) {
+                console.error(error);
+                document.getElementById('loadingMsg').innerText = "⚠️ Error leyendo datos.";
+            }
+        }
+        
+        function processData(rawInput) {
+            processedData = {};
+            rawInput.forEach(row => {
+                const zone = row.loc;
+                if (!zone) return;
+                let typeIndex = -1;
+                const type = row.type.toLowerCase();
+                if(type.includes('departamento')) typeIndex = 0;
+                else if(type.includes('casa')) typeIndex = 1;
+                else if(type.includes('ph')) typeIndex = 2;
+                else typeIndex = 3;
+                
+                if(!processedData[zone]) {
+                    processedData[zone] = { totalVal: 0, totalArea: 0, vals: [0,0,0,0], areas: [0,0,0,0] };
+                }
+                
+                if(row.val > 0 && row.area > 0) {
+                    processedData[zone].totalVal += row.val;
+                    processedData[zone].totalArea += row.area;
+                    processedData[zone].vals[typeIndex] += row.val;
+                    processedData[zone].areas[typeIndex] += row.area;
+                }
+            });
+        }
+        
+        function initDashboard() {
+            const select = document.getElementById('zoneSelect');
+            select.innerHTML = '';
+            
+            const topZones = ["Centro", "Plaza Colón", "La Perla", "Güemes", "Playa Grande", "Chauvín", "Constitución"];
+            const allZones = Object.keys(processedData).sort();
+            const otherZones = allZones.filter(z => !topZones.includes(z));
+            
+            const addOption = (val, text, parent) => {
+                const opt = document.createElement('option');
+                opt.value = val; opt.text = text; parent.appendChild(opt);
+            };
+            
+            if (processedData["Centro"]) addOption("Centro", "🏙️ Centro", select);
+            else if (allZones.length > 0) addOption(allZones[0], `📍 ${allZones[0]}`, select);
+            
+            const grpTop = document.createElement('optgroup'); grpTop.label = "--- DESTACADOS ---";
+            topZones.filter(z => processedData[z] && z !== "Centro").forEach(z => addOption(z, z, grpTop));
+            select.appendChild(grpTop);
+            
+            const grpOthers = document.createElement('optgroup'); grpOthers.label = "--- BARRIOS A-Z ---";
+            otherZones.forEach(z => addOption(z, z, grpOthers));
+            select.appendChild(grpOthers);
+            
+            const ctx = document.getElementById('myRealEstateChart').getContext('2d');
+            myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        data: [1,0,0,0],
+                        backgroundColor: chartColors,
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: {
+                            color: '#ffffff',
+                            font: { weight: 'bold', size: 12 },
+                            formatter: (value, ctx) => {
+                                let sum = 0;
+                                let dataArr = ctx.chart.data.datasets[0].data;
+                                dataArr.map(data => { sum += data; });
+                                let percentage = sum > 0 ? (value*100 / sum).toFixed(0) : 0;
+                                return percentage > 4 ? percentage + "%" : "";
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const zoneName = select.value;
+                                    const zoneData = processedData[zoneName];
+                                    if (!zoneData) return "";
+                                    const typeIdx = context.dataIndex;
+                                    const area = zoneData.areas[typeIdx];
+                                    const val = zoneData.vals[typeIdx];
+                                    const priceM2 = area > 0 ? (val / area) : 0;
+                                    return ` ${context.label}: USD ${formatCurrency(priceM2)}/m²`;
+                                }
+                            },
+                            backgroundColor: 'rgba(38, 70, 83, 0.95)',
+                            padding: 10,
+                            cornerRadius: 6
+                        }
+                    },
+                    animation: { animateScale: true }
+                }
+            });
+            
+            updateDashboard();
+        }
+        
+        function updateDashboard() {
+            const zone = document.getElementById('zoneSelect').value;
+            const data = processedData[zone];
+            const listContainer = document.getElementById('priceList');
+            const mainDisplay = document.getElementById('mainPriceDisplay');
+            
+            if (!data) return;
+            
+            const avgGlobal = data.totalArea > 0 ? (data.totalVal / data.totalArea) : 0;
+            mainDisplay.innerText = `USD ${formatCurrency(avgGlobal)}`;
+            
+            listContainer.innerHTML = '';
+            const chartData = [];
+            
+            chartLabels.forEach((label, index) => {
+                const val = data.vals[index];
+                const area = data.areas[index];
+                const priceM2 = area > 0 ? (val / area) : 0;
+                
+                chartData.push(area);
+                
+                if (priceM2 > 0) {
+                    const color = chartColors[index];
+                    const row = document.createElement('div');
+                    row.className = 'price-row';
+                    row.innerHTML = `
+                        <div class="price-label"><span class="dot" style="background-color: ${color}"></span>${label}</div>
+                        <div class="price-value">USD ${formatCurrency(priceM2)}<span class="unit">/m²</span></div>
+                    `;
+                    listContainer.appendChild(row);
+                }
+            });
+            
+            if (myChart) {
+                myChart.data.datasets[0].data = chartData;
+                myChart.update();
+            }
+        }
+        
+        fetchData();
+    </script>
 </body>
 </html>
