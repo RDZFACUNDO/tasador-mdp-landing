@@ -110,30 +110,31 @@
         
         /* Container */
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 60px 24px;
         }
         
-        /* Stats + Tasador Promo Grid */
+        /* Main Grid - Stats + Tasador lado a lado */
         .main-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 450px 1fr;
             gap: 32px;
             margin-bottom: 60px;
+            align-items: start;
         }
         
-        @media (max-width: 900px) {
+        @media (max-width: 1024px) {
             .main-grid {
                 grid-template-columns: 1fr;
             }
         }
         
-        /* Stats Widget */
-        .stats-widget {
+        /* Stats Widget - Compacto */
+        .stats-widget-compact {
             background: white;
             border-radius: 12px;
-            padding: 32px;
+            padding: 24px;
             box-shadow: 0 4px 16px rgba(0,0,0,0.08);
         }
         
@@ -166,7 +167,6 @@
         
         .price-list-container {
             padding: 10px 0;
-            margin-bottom: 20px;
         }
         
         h3 {
@@ -219,7 +219,7 @@
         }
         
         .chart-box {
-            height: 220px;
+            height: 200px;
             position: relative;
             margin: 20px auto;
         }
@@ -255,22 +255,23 @@
             display: none;
         }
         
-        /* Tasador Promo Card */
-        .tasador-promo {
+        /* Tasador Section */
+        .tasador-section {
             background: white;
             border-radius: 12px;
-            padding: 40px;
+            padding: 32px;
             box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            text-align: center;
         }
         
-        .tasador-promo h2 {
+        .tasador-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        
+        .tasador-header h2 {
             font-size: 28px;
             color: #5B8B8A;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             font-weight: 700;
             display: flex;
             align-items: center;
@@ -278,45 +279,99 @@
             gap: 12px;
         }
         
-        .tasador-promo p {
+        .tasador-header p {
             color: #666;
-            font-size: 16px;
+            font-size: 15px;
             line-height: 1.7;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
         
-        .tasador-promo .description {
+        .tasador-description {
             background: #f8f9fa;
-            padding: 20px;
+            padding: 16px;
             border-radius: 8px;
             margin-bottom: 24px;
             border-left: 4px solid #5B8B8A;
-            text-align: left;
         }
         
-        .tasador-promo .description p {
+        .tasador-description p {
             font-size: 14px;
             color: #555;
             margin: 0;
+            line-height: 1.6;
         }
         
-        .cta-button-large {
+        .iframe-container {
+            position: relative;
+            width: 100%;
+            height: 700px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            background: #f0f0f0;
+        }
+        
+        .iframe-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .open-fullscreen {
+            text-align: center;
+            margin-top: 16px;
+        }
+        
+        .open-fullscreen a {
             display: inline-block;
-            padding: 18px 48px;
+            padding: 12px 32px;
             background: #5B8B8A;
             color: white;
             text-decoration: none;
-            font-size: 18px;
-            font-weight: 700;
-            border-radius: 8px;
+            border-radius: 6px;
+            font-weight: 600;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(91, 139, 138, 0.3);
+            font-size: 14px;
         }
         
-        .cta-button-large:hover {
+        .open-fullscreen a:hover {
             background: #4a7a79;
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(91, 139, 138, 0.4);
+        }
+        
+        /* Google Slides Section */
+        .slides-section {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            margin-bottom: 60px;
+        }
+        
+        .slides-section h2 {
+            font-size: 32px;
+            color: #5B8B8A;
+            margin-bottom: 24px;
+            text-align: center;
+            font-weight: 700;
+        }
+        
+        .slides-container {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 ratio */
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .slides-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
         }
         
         /* Cards Section */
@@ -367,39 +422,47 @@
             font-size: 15px;
         }
         
-        /* Google Slides Section */
-        .slides-section {
-            background: white;
-            border-radius: 12px;
-            padding: 40px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        /* Links Section */
+        .links-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
             margin-bottom: 60px;
         }
         
-        .slides-section h2 {
-            font-size: 32px;
-            color: #5B8B8A;
-            margin-bottom: 24px;
+        .link-card {
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
             text-align: center;
-            font-weight: 700;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
         }
         
-        .slides-container {
-            position: relative;
-            width: 100%;
-            padding-top: 56.25%; /* 16:9 ratio */
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        .link-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
         }
         
-        .slides-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
+        .link-card h3 {
+            font-size: 20px;
+            color: #5B8B8A;
+            margin-bottom: 16px;
+        }
+        
+        .link-card a {
+            display: inline-block;
+            padding: 12px 32px;
+            background: #5B8B8A;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .link-card a:hover {
+            background: #4a7a79;
         }
         
         /* Note Section */
@@ -479,6 +542,16 @@
         }
         
         /* Responsive */
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .iframe-container {
+                height: 600px;
+            }
+        }
+        
         @media (max-width: 768px) {
             .header {
                 height: 300px;
@@ -492,8 +565,12 @@
                 padding: 40px 16px;
             }
             
-            .main-grid {
-                grid-template-columns: 1fr;
+            .tasador-section {
+                padding: 20px;
+            }
+            
+            .iframe-container {
+                height: 500px;
             }
             
             .cards-section {
@@ -518,18 +595,18 @@
     <!-- Nav -->
     <nav>
         <ul>
-            <li><a href="index.html">Reporte Inmobiliario</a></li>
+            <li><a href="#inicio">Reporte Inmobiliario</a></li>
             <li><a href="https://rdzfacundo.github.io/mapa-mdp/Mapa_Calor_MDP" target="_blank">Mapa de calor</a></li>
-            <li><a href="tasador.html">Tasador</a></li>
+            <li><a href="#tasador">Tasador</a></li>
         </ul>
     </nav>
     
     <!-- Main Content -->
     <div class="container">
-        <!-- Grid: Stats + Tasador Promo -->
-        <div class="main-grid">
-            <!-- Stats Widget -->
-            <div class="stats-widget">
+        <!-- Main Grid: Stats + Tasador lado a lado -->
+        <div class="main-grid" id="inicio">
+            <!-- Stats Widget Compacto -->
+            <div class="stats-widget-compact">
                 <div class="widget-container">
                     <div id="loadingMsg">⏳ Cargando datos...</div>
                     <div id="dashboardContent" class="hidden">
@@ -553,14 +630,16 @@
                 </div>
             </div>
             
-            <!-- Tasador Promo -->
-            <div class="tasador-promo">
-                <h2>🏠 TASADOR ONLINE: MAR DEL PLATA</h2>
-                <p>
-                    Es un valuador de propiedades online. En muy pocos clicks, 
-                    podrás conocer el valor de venta de una propiedad.
-                </p>
-                <div class="description">
+            <!-- Tasador Integrado -->
+            <div class="tasador-section" id="tasador">
+                <div class="tasador-header">
+                    <h2>🏠 TASADOR ONLINE: MAR DEL PLATA</h2>
+                    <p>
+                        Es un valuador de propiedades online. En muy pocos clicks, 
+                        podrás conocer el valor de venta de una propiedad.
+                    </p>
+                </div>
+                <div class="tasador-description">
                     <p>
                         Tanto el precio estimado como el rango de precios surgen de un modelo 
                         algorítmico que considera tanto características intrínsecas del inmueble 
@@ -568,11 +647,35 @@
                         al contexto de la misma (como el barrio y la ubicación).
                     </p>
                 </div>
-                <a href="tasador.html" class="cta-button-large">
-                    Tasador Online
-                </a>
+                <div class="iframe-container">
+                    <iframe 
+                        src="https://tasador-mdp.streamlit.app/?embedded=true" 
+                        title="Tasador Inmobiliario MDP"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        loading="lazy">
+                    </iframe>
+                </div>
+                <div class="open-fullscreen">
+                    <a href="https://tasador-mdp.streamlit.app/" target="_blank">
+                        Abrir en Pantalla Completa
+                    </a>
+                </div>
             </div>
         </div>
+        
+        <!-- Google Slides Section -->
+        <section class="slides-section">
+            <h2>📊 Reporte Inmobiliario Enero 2026</h2>
+            <div class="slides-container">
+                <iframe 
+                    src="https://docs.google.com/presentation/d/1MduhW5djqhvjRYtoMoWSHWFBeJyPMXVCifEzFb-R5M4/embed?start=true&loop=true&delayms=5000&slide=id.g3940369b8a3_1_507" 
+                    frameborder="0" 
+                    allowfullscreen="true" 
+                    mozallowfullscreen="true" 
+                    webkitallowfullscreen="true">
+                </iframe>
+            </div>
+        </section>
         
         <!-- Property Cards -->
         <div class="cards-section">
@@ -612,19 +715,16 @@
             </div>
         </div>
         
-        <!-- Google Slides Section -->
-        <section class="slides-section">
-            <h2>📊 Reporte Inmobiliario Enero 2026</h2>
-            <div class="slides-container">
-                <iframe 
-                    src="https://docs.google.com/presentation/d/1MduhW5djqhvjRYtoMoWSHWFBeJyPMXVCifEzFb-R5M4/embed?start=true&loop=true&delayms=5000&slide=id.g3940369b8a3_1_507" 
-                    frameborder="0" 
-                    allowfullscreen="true" 
-                    mozallowfullscreen="true" 
-                    webkitallowfullscreen="true">
-                </iframe>
+        <!-- Links adicionales -->
+        <div class="links-section">
+            <div class="link-card">
+                <h3>🗺️ Mapa de Calor</h3>
+                <p>Explora los precios por zona de Mar del Plata</p>
+                <a href="https://rdzfacundo.github.io/mapa-mdp/Mapa_Calor_MDP" target="_blank">
+                    Ver Mapa
+                </a>
             </div>
-        </section>
+        </div>
         
         <!-- Nota al pie -->
         <div class="note-section">
