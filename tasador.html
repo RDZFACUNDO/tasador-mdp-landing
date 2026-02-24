@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasador Online - Mar del Plata</title>
+    <meta name="description" content="Valuador de propiedades online para Mar del Plata. Machine Learning aplicado al mercado inmobiliario local.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        /* Header Simple */
+        .header {
+            background: white;
+            padding: 24px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #5B8B8A;
+            text-decoration: none;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: #5B8B8A;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .back-link:hover {
+            background: #4a7a79;
+            transform: translateY(-2px);
+        }
+        
+        /* Nav */
+        nav {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        nav li {
+            padding: 0;
+        }
+        
+        nav a {
+            display: block;
+            padding: 20px 32px;
+            color: #5B8B8A;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+        
+        nav a:hover {
+            background: #f0f0f0;
+            border-bottom-color: #5B8B8A;
+        }
+        
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+        
+        /* Tasador Section */
+        .tasador-section {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            margin-bottom: 40px;
+        }
+        
+        .tasador-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .tasador-header h1 {
+            font-size: 36px;
+            color: #5B8B8A;
+            margin-bottom: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        .tasador-header p {
+            color: #666;
+            font-size: 18px;
+            line-height: 1.7;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .tasador-description {
+            background: #f8f9fa;
+            padding: 24px;
+            border-radius: 8px;
+            margin-bottom: 32px;
+            border-left: 4px solid #5B8B8A;
+        }
+        
+        .tasador-description p {
+            font-size: 15px;
+            color: #555;
+            line-height: 1.7;
+            margin-bottom: 12px;
+        }
+        
+        .tasador-description p:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* Iframe Container */
+        .iframe-container {
+            position: relative;
+            width: 100%;
+            height: 800px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            background: #f0f0f0;
+        }
+        
+        .iframe-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .open-fullscreen {
+            text-align: center;
+            margin-top: 24px;
+        }
+        
+        .open-fullscreen a {
+            display: inline-block;
+            padding: 14px 36px;
+            background: #5B8B8A;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 15px;
+        }
+        
+        .open-fullscreen a:hover {
+            background: #4a7a79;
+            transform: translateY(-2px);
+        }
+        
+        /* Footer */
+        footer {
+            background: #2c3e50;
+            color: white;
+            padding: 60px 24px 30px;
+            margin-top: 60px;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 48px;
+            margin-bottom: 40px;
+        }
+        
+        .footer-logo {
+            text-align: center;
+        }
+        
+        .footer-logo img {
+            max-width: 200px;
+            height: auto;
+            margin-bottom: 16px;
+        }
+        
+        .footer-section h4 {
+            font-size: 18px;
+            margin-bottom: 16px;
+            color: #5B8B8A;
+        }
+        
+        .footer-section p,
+        .footer-section a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            display: block;
+            margin-bottom: 8px;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-section a:hover {
+            color: #5B8B8A;
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                justify-content: center;
+                text-align: center;
+            }
+            
+            nav a {
+                padding: 16px 20px;
+            }
+            
+            .container {
+                padding: 24px 16px;
+            }
+            
+            .tasador-section {
+                padding: 24px 20px;
+            }
+            
+            .tasador-header h1 {
+                font-size: 28px;
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .iframe-container {
+                height: 600px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html" class="logo">REPORTE INMOBILIARIO MDP</a>
+            <a href="index.html" class="back-link">
+                ← Volver al Inicio
+            </a>
+        </div>
+    </header>
+    
+    <!-- Nav -->
+    <nav>
+        <ul>
+            <li><a href="index.html">Reporte Inmobiliario</a></li>
+            <li><a href="https://rdzfacundo.github.io/mapa-mdp/Mapa_Calor_MDP" target="_blank">Mapa de calor</a></li>
+            <li><a href="tasador.html">Tasador</a></li>
+        </ul>
+    </nav>
+    
+    <!-- Main Content -->
+    <div class="container">
+        <section class="tasador-section">
+            <div class="tasador-header">
+                <h1>🏠 TASADOR ONLINE: MAR DEL PLATA</h1>
+                <p>
+                    Es un valuador de propiedades online. En muy pocos clicks, 
+                    podrás conocer el valor de venta de una propiedad.
+                </p>
+            </div>
+            
+            <div class="tasador-description">
+                <p>
+                    Tanto el precio estimado como el rango de precios surgen de un modelo 
+                    algorítmico que considera tanto características intrínsecas del inmueble 
+                    (como la superficie y la cantidad de ambientes) como aquellas relacionadas 
+                    al contexto de la misma (como el barrio y la ubicación).
+                </p>
+                <p>
+                    <strong>Este tasador utiliza un modelo de Machine Learning (Random Forest)</strong> 
+                    desarrollado específicamente para el mercado de Mar del Plata, basado en el análisis 
+                    de más de 21.000 propiedades locales.
+                </p>
+            </div>
+            
+            <!-- Iframe del Tasador -->
+            <div class="iframe-container">
+                <iframe 
+                    src="https://tasador-mdp.streamlit.app/?embedded=true" 
+                    title="Tasador Inmobiliario MDP"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    loading="lazy">
+                </iframe>
+            </div>
+            
+            <div class="open-fullscreen">
+                <a href="https://tasador-mdp.streamlit.app/" target="_blank">
+                    ↗ Abrir en Pantalla Completa
+                </a>
+            </div>
+        </section>
+    </div>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">
+                <img src="./images/Logo_4.png" alt="Reporte Inmobiliario MDP">
+            </div>
+            
+            <div class="footer-section">
+                <h4>Contacto</h4>
+                <p><strong>Desarrollo por:</strong><br>Facundo Manzo Rodriguez</p>
+                <a href="mailto:rodriguezfacundomdp@gmail.com">rodriguezfacundomdp@gmail.com</a>
+                <a href="tel:+542236233628">223-623-3628</a>
+            </div>
+            
+            <div class="footer-section">
+                <h4>Conectar</h4>
+                <a href="http://www.linkedin.com/in/facundo-rodriguez-83369730a" target="_blank">
+                    LinkedIn
+                </a>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            © 2025 Reporte Inmobiliario Mar del Plata. Todos los derechos reservados.
+        </div>
+    </footer>
+</body>
+</html>
