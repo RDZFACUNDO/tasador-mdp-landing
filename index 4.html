@@ -141,24 +141,6 @@
             background: #ffffff;
         }
         
-        .main-title {
-            text-align: center;
-            color: #1d6e5d;
-            font-size: 22px;
-            margin: 0 0 20px 0;
-            font-weight: 800;
-        }
-        
-        .chart-subtitle {
-            text-align: center;
-            font-size: 11px;
-            color: #999;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin: 0 0 10px 0;
-            font-weight: 600;
-        }
-        
         .controls {
             margin-bottom: 20px;
             text-align: center;
@@ -170,7 +152,6 @@
             border: 1px solid #ccc;
             font-size: 15px;
             width: 100%;
-            max-width: 350px;
             background-color: #fcfcfc;
             cursor: pointer;
             font-weight: 500;
@@ -183,21 +164,9 @@
             border-color: #888;
         }
         
-        .stats-grid {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: flex-start;
-            justify-content: center;
-            gap: 15px;
-        }
-        
         .price-list-container {
-            flex: 1;
-            min-width: 180px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 10px;
+            padding: 10px 0;
+            margin-bottom: 20px;
         }
         
         h3 {
@@ -216,9 +185,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 6px 0;
+            padding: 8px 0;
             border-bottom: 1px dashed #eee;
-            font-size: 13px;
+            font-size: 14px;
         }
         
         .price-label {
@@ -238,46 +207,41 @@
         
         .price-value {
             font-weight: 700;
-            font-size: 15px;
+            font-size: 16px;
             color: #333;
         }
         
         .unit {
-            font-size: 10px;
+            font-size: 11px;
             color: #999;
             font-weight: 400;
             margin-left: 2px;
         }
         
         .chart-box {
-            flex: 1;
-            min-width: 220px;
-            max-width: 280px;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .canvas-container {
+            height: 220px;
             position: relative;
-            height: 200px;
-            width: 100%;
+            margin: 20px auto;
         }
         
         .general-avg {
             text-align: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
         
         .big-number {
-            font-size: 32px;
+            font-size: 40px;
             font-weight: 800;
-            color: #1d6e5d;
+            color: #264653;
             line-height: 1;
         }
         
         .subtitle {
-            font-size: 12px;
+            font-size: 13px;
             color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
         }
         
         #loadingMsg {
@@ -567,9 +531,8 @@
             <!-- Stats Widget -->
             <div class="stats-widget">
                 <div class="widget-container">
-                    <div id="loadingMsg">⏳ Procesando datos del mercado...</div>
+                    <div id="loadingMsg">⏳ Cargando datos...</div>
                     <div id="dashboardContent" class="hidden">
-                        <h2 class="main-title">Explora el precio por barrio</h2>
                         <div class="controls">
                             <select id="zoneSelect" onchange="updateDashboard()">
                                 <option value="">Selecciona una zona...</option>
@@ -579,17 +542,12 @@
                             <div class="subtitle">PRECIO PROMEDIO ZONA</div>
                             <div id="mainPriceDisplay" class="big-number">---</div>
                         </div>
-                        <div class="stats-grid">
-                            <div class="price-list-container">
-                                <h3>Desglose por Tipo</h3>
-                                <div id="priceList"></div>
-                            </div>
-                            <div class="chart-box">
-                                <div class="chart-subtitle">Distribución de las propiedades</div>
-                                <div class="canvas-container">
-                                    <canvas id="myRealEstateChart"></canvas>
-                                </div>
-                            </div>
+                        <div class="price-list-container">
+                            <h3>Desglose por Tipo</h3>
+                            <div id="priceList"></div>
+                        </div>
+                        <div class="chart-box">
+                            <canvas id="myRealEstateChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -719,7 +677,7 @@
         let processedData = {};
         let myChart = null;
         const chartLabels = ['Departamentos', 'Casas', 'PHs', 'Locales'];
-        const chartColors = ['#1d6e5d', '#e9c46a', '#f4a261', '#e76f51'];
+        const chartColors = ['#2a9d8f', '#e9c46a', '#f4a261', '#e76f51'];
         
         const formatCurrency = (num) => num.toLocaleString('es-AR', {maximumFractionDigits: 0});
         
@@ -759,7 +717,7 @@
                 document.getElementById('dashboardContent').classList.remove('hidden');
             } catch (error) {
                 console.error(error);
-                document.getElementById('loadingMsg').innerText = "⚠️ Error leyendo datos. Verifica las columnas.";
+                document.getElementById('loadingMsg').innerText = "⚠️ Error leyendo datos.";
             }
         }
         
@@ -854,7 +812,7 @@
                                     return ` ${context.label}: USD ${formatCurrency(priceM2)}/m²`;
                                 }
                             },
-                            backgroundColor: 'rgba(29, 110, 93, 0.95)',
+                            backgroundColor: 'rgba(38, 70, 83, 0.95)',
                             padding: 10,
                             cornerRadius: 6
                         }
