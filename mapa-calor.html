@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa de Calor - Mar del Plata</title>
+    <meta name="description" content="Mapa de calor de precios inmobiliarios por zona en Mar del Plata. Visualiza los valores por m² en cada barrio.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            overflow: hidden;
+        }
+        
+        /* Header Simple */
+        .header {
+            background: white;
+            padding: 24px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #5B8B8A;
+            text-decoration: none;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: #5B8B8A;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .back-link:hover {
+            background: #4a7a79;
+            transform: translateY(-2px);
+        }
+        
+        /* Nav */
+        nav {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        nav li {
+            padding: 0;
+        }
+        
+        nav a {
+            display: block;
+            padding: 20px 32px;
+            color: #5B8B8A;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+        
+        nav a:hover {
+            background: #f0f0f0;
+            border-bottom-color: #5B8B8A;
+        }
+        
+        /* Map Container - Full Height */
+        .map-container {
+            position: fixed;
+            top: 120px; /* Header + Nav height */
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+        }
+        
+        .map-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        /* Info Banner */
+        .info-banner {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            z-index: 1000;
+            max-width: 350px;
+        }
+        
+        .info-banner h3 {
+            font-size: 16px;
+            color: #5B8B8A;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        
+        .info-banner p {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .close-banner {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #999;
+            cursor: pointer;
+            padding: 4px 8px;
+            line-height: 1;
+        }
+        
+        .close-banner:hover {
+            color: #333;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                justify-content: center;
+                text-align: center;
+            }
+            
+            nav a {
+                padding: 16px 20px;
+                font-size: 14px;
+            }
+            
+            .map-container {
+                top: 140px;
+            }
+            
+            .info-banner {
+                display: none; /* Ocultar en móvil para no obstruir */
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html" class="logo">REPORTE INMOBILIARIO MDP</a>
+            <a href="index.html" class="back-link">
+                ← Volver al Inicio
+            </a>
+        </div>
+    </header>
+    
+    <!-- Nav -->
+    <nav>
+        <ul>
+            <li><a href="index.html">Reporte Inmobiliario</a></li>
+            <li><a href="mapa-calor.html">Mapa de calor</a></li>
+            <li><a href="tasador.html">Tasador</a></li>
+        </ul>
+    </nav>
+    
+    <!-- Map Container -->
+    <div class="map-container">
+        <iframe 
+            class="map-iframe"
+            src="https://rdzfacundo.github.io/mapa-mdp/Mapa_Calor_MDP" 
+            title="Mapa de Calor Inmobiliario MDP"
+            allow="geolocation"
+            loading="lazy">
+        </iframe>
+    </div>
+    
+    <!-- Info Banner (opcional, se puede cerrar) -->
+    <div class="info-banner" id="infoBanner">
+        <button class="close-banner" onclick="document.getElementById('infoBanner').style.display='none'">×</button>
+        <h3>🗺️ Mapa de Calor</h3>
+        <p>Explora los precios por m² en cada zona de Mar del Plata. Haz clic en las áreas para ver detalles.</p>
+    </div>
+</body>
+</html>
