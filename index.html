@@ -466,16 +466,16 @@
         footer {
             background: #2c3e50;
             color: white;
-            padding: 60px 24px 30px;
+            padding: 40px 24px 20px; /* Reducimos el espacio arriba y abajo */
         }
         
         .footer-content {
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 48px;
-            margin-bottom: 40px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Columnas más juntas */
+            gap: 32px; /* Reducimos el espacio entre las 3 columnas */
+            margin-bottom: 24px; /* Menos espacio antes de la línea final */
         }
         
         .footer-logo {
@@ -483,13 +483,14 @@
         }
         
         .footer-logo img {
-            max-width: 200px;
+            max-width: 140px; /* Achicamos solo el logo */
             height: auto;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
+            border-radius: 8px; /* Un pequeño redondeo para el cuadrado blanco */
         }
         
         .footer-section h4 {
-            font-size: 18px;
+            font-size: 18px; /* Tamaño original */
             margin-bottom: 16px;
             color: #5B8B8A;
         }
@@ -500,6 +501,7 @@
             text-decoration: none;
             display: block;
             margin-bottom: 8px;
+            font-size: 16px; /* Tamaño original */
             transition: color 0.3s ease;
         }
         
@@ -509,10 +511,10 @@
         
         .footer-bottom {
             text-align: center;
-            padding-top: 24px;
+            padding-top: 24px; /* Espacio original */
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             color: rgba(255, 255, 255, 0.6);
-            font-size: 14px;
+            font-size: 14px; /* Tamaño original */
         }
         
         /* Responsive */
