@@ -545,27 +545,12 @@
                         </div>
 
                         {/* Tablas Inferiores */}
-                        <div className="h-72 grid grid-cols-4 gap-6 min-h-0">
-                            <Table 
-                                title="Real Estate" 
-                                data={realEstateData} 
-                                onRowClick={(name) => setInmobiliaria(inmobiliaria === name ? 'Todas' : name)}
-                                activeFilters={inmobiliaria}
-                            />
-                            <Table 
-                                title="Location" 
-                                data={locationData} 
-                                onRowClick={(name) => toggleArrayFilter(setBarrios, barrios, name)}
-                                activeFilters={barrios}
-                            />
-                            <Table 
-                                title="Ambientes" 
-                                data={ambientesData} 
-                                onRowClick={(name) => toggleArrayFilter(setAmbientes, ambientes, name)}
-                                activeFilters={ambientes}
-                            />
-                            <div className="flex flex-col h-full min-h-0">
-                                <div className="flex justify-center font-bold text-teal-800 border-b-[3px] border-gray-300 pb-2 mb-2 text-base shrink-0">
+                        <div className="h-64 grid grid-cols-4 gap-6">
+                            <Table title="Real Estate" data={realEstateData} />
+                            <Table title="Location" data={locationData} />
+                            <Table title="Ambientes" data={ambientesData} />
+                            <div className="flex flex-col h-full">
+                                <div className="flex justify-center font-bold text-teal-800 border-b-[3px] border-gray-300 pb-2 mb-2 text-base">
                                     <span>Link</span>
                                 </div>
                                 <div className="flex-1 overflow-y-auto table-container text-xs pr-2">
@@ -585,7 +570,7 @@
         };
 
         // Componente de Tabla Reutilizable con Ordenamiento
-        const Table = ({ title, data, onRowClick, activeFilters = [] }) => {
+        const Table = ({ title, data }) => {
             const [sortConfig, setSortConfig] = useState({ key: 'quantity', direction: 'desc' });
 
             const sortedData = useMemo(() => {
@@ -623,41 +608,36 @@
                 setSortConfig({ key, direction });
             };
 
+            const getSortIcon = (key) => {
+                if (!sortConfig || sortConfig.key !== key) return '↕';
+                return sortConfig.direction === 'asc' ? '↑' : '↓';
+            };
+
             return (
-                <div className="flex flex-col h-full min-h-0">
-                    <div className="flex justify-between font-bold text-teal-800 border-b-[3px] border-gray-300 pb-2 mb-2 text-base shrink-0">
+                <div className="flex flex-col h-full">
+                    <div className="flex justify-between font-bold text-teal-800 border-b-[3px] border-gray-300 pb-2 mb-2 text-base">
                         <span className="cursor-pointer hover:text-teal-600" onClick={() => requestSort('name')}>
-                            {title}
+                            {title} <span className="text-xs text-gray-400">{getSortIcon('name')}</span>
                         </span>
                         <div className="flex gap-6">
                             <span className="cursor-pointer hover:text-teal-600" onClick={() => requestSort('avgM2')}>
-                                Valor M2
+                                Valor M2 <span className="text-xs text-gray-400">{getSortIcon('avgM2')}</span>
                             </span>
                             <span className="cursor-pointer hover:text-teal-600" onClick={() => requestSort('quantity')}>
-                                Quantity
+                                Quantity <span className="text-xs text-gray-400">{getSortIcon('quantity')}</span>
                             </span>
                         </div>
                     </div>
                     <div className="flex-1 overflow-y-auto table-container text-sm pr-1">
-                        {sortedData.map((row, idx) => {
-                            const isActive = Array.isArray(activeFilters) 
-                                ? activeFilters.includes(row.name) 
-                                : activeFilters === row.name;
-                            
-                            return (
-                                <div 
-                                    key={idx} 
-                                    onClick={() => onRowClick && onRowClick(row.name)}
-                                    className={`flex justify-between p-2 cursor-pointer transition-colors ${isActive ? 'bg-teal-100 border-l-4 border-teal-600' : (idx % 2 === 0 ? 'bg-white' : 'bg-gray-100')} hover:bg-teal-50`}
-                                >
-                                    <span className="truncate w-1/2 text-gray-800 font-medium" title={row.name}>{row.name}</span>
-                                    <div className="flex gap-6 w-1/2 justify-end text-gray-700">
-                                        <span className="w-16 text-right">{formatNumber(row.avgM2)}</span>
-                                        <span className="w-16 text-right">{formatNumber(row.quantity)}</span>
-                                    </div>
+                        {sortedData.map((row, idx) => (
+                            <div key={idx} className={`flex justify-between p-2 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-100'}`}>
+                                <span className="truncate w-1/2 text-gray-700" title={row.name}>{row.name}</span>
+                                <div className="flex gap-6 w-1/2 justify-end text-gray-700">
+                                    <span className="w-16 text-right">{formatNumber(row.avgM2)}</span>
+                                    <span className="w-16 text-right">{formatNumber(row.quantity)}</span>
                                 </div>
-                            );
-                        })}
+                            </div>
+                        ))}
                     </div>
                 </div>
             );
