@@ -267,8 +267,6 @@
             const [tipos, setTipos] = useState([]);
             const [areaMin, setAreaMin] = useState(20);
             const [areaMax, setAreaMax] = useState(240);
-            const [areaCubiertaMin, setAreaCubiertaMin] = useState(20);
-            const [areaCubiertaMax, setAreaCubiertaMax] = useState(240);
             const [valorMin, setValorMin] = useState(50000);
             const [valorMax, setValorMax] = useState(150000);
             const [inmobiliaria, setInmobiliaria] = useState('Todas');
@@ -302,10 +300,10 @@
                         setData(finalData);
 
                         // Extraer opciones únicas para los filtros
-                        const uniqueTipos = ['Casa', 'Departamento', 'Desarrollo', 'Local', 'Oficina', 'PH'];
+                        const uniqueTipos = [...new Set(finalData.map(d => d.type_subtitle).filter(Boolean))].sort();
                         const uniqueInmobiliarias = [...new Set(finalData.map(d => d.publisher).filter(Boolean))].sort();
                         const uniqueBarrios = [...new Set(finalData.map(d => d.Barrio).filter(Boolean))].sort();
-                        const uniqueAmbientes = ['1', '2', '3', '4', '5', '6+'];
+                        const uniqueAmbientes = [...new Set(finalData.map(d => d.rooms).filter(Boolean))].sort((a,b)=>a-b);
 
                         setOpciones({
                             tipos: uniqueTipos,
@@ -327,33 +325,14 @@
             const filteredData = useMemo(() => {
                 return data.filter(item => {
                     if (tipos.length > 0 && !tipos.includes(item.type_subtitle)) return false;
-                    
-                    if (ambientes.length > 0) {
-                        const itemRooms = item.rooms >= 6 ? '6+' : String(item.rooms);
-                        if (!ambientes.includes(itemRooms)) return false;
-                    }
-
+                    if (ambientes.length > 0 && !ambientes.includes(item.rooms)) return false;
                     if (inmobiliaria !== 'Todas' && item.publisher !== inmobiliaria) return false;
                     if (barrio !== 'Todas' && item.Barrio !== barrio) return false;
+                    if (item.total_area_m2 < areaMin || item.total_area_m2 > areaMax) return false;
                     if (item.price_value < valorMin || item.price_value > valorMax) return false;
-
-                    // Lógica de áreas
-                    const isSameAreaType = ['Desarrollo', 'Oficina', 'PH', 'Departamento'].includes(item.type_subtitle);
-                    
-                    if (isSameAreaType) {
-                        // Si es de estos tipos, el área total y cubierta deben ser iguales y cumplir con ambos rangos
-                        if (item.total_area_m2 < areaMin || item.total_area_m2 > areaMax) return false;
-                        if (item.total_area_m2 < areaCubiertaMin || item.total_area_m2 > areaCubiertaMax) return false;
-                    } else {
-                        // Si es Casa o Local, se evalúan por separado (asumiendo que tienes un campo covered_area_m2, si no, usamos total_area_m2 como fallback)
-                        const coveredArea = item.covered_area_m2 || item.total_area_m2;
-                        if (item.total_area_m2 < areaMin || item.total_area_m2 > areaMax) return false;
-                        if (coveredArea < areaCubiertaMin || coveredArea > areaCubiertaMax) return false;
-                    }
-
                     return true;
                 });
-            }, [data, tipos, ambientes, inmobiliaria, barrio, areaMin, areaMax, areaCubiertaMin, areaCubiertaMax, valorMin, valorMax]);
+            }, [data, tipos, ambientes, inmobiliaria, barrio, areaMin, areaMax, valorMin, valorMax]);
 
             // KPIs
             const avgValorM2 = useMemo(() => {
@@ -380,24 +359,7 @@
 
             const realEstateData = aggregateBy('publisher');
             const locationData = aggregateBy('Barrio');
-            const ambientesData = aggregateBy('rooms').map(item => {
-                // Reagrupar para la tabla si es necesario, aunque ya viene agrupado por el valor real
-                return {
-                    ...item,
-                    name: item.name >= 6 ? '6+' : item.name
-                };
-            }).reduce((acc, curr) => {
-                // Combinar los 6+ en la tabla
-                const existing = acc.find(x => x.name === curr.name);
-                if (existing) {
-                    const totalQuantity = existing.quantity + curr.quantity;
-                    existing.avgM2 = Math.round(((existing.avgM2 * existing.quantity) + (curr.avgM2 * curr.quantity)) / totalQuantity);
-                    existing.quantity = totalQuantity;
-                } else {
-                    acc.push(curr);
-                }
-                return acc;
-            }, []).sort((a, b) => (a.name === '6+' ? 1 : b.name === '6+' ? -1 : a.name - b.name));
+            const ambientesData = aggregateBy('rooms');
 
             const toggleArrayFilter = (setter, array, value) => {
                 setter(array.includes(value) ? array.filter(v => v !== value) : [...array, value]);
@@ -433,17 +395,9 @@
                         {/* Filtro: Area M2 */}
                         <div>
                             <h3 className="font-bold text-teal-800 text-lg mb-2">Area M2</h3>
-                            <div className="flex gap-2">
-                                <div className="flex flex-col gap-1 w-1/2">
-                                    <span className="text-xs text-gray-500 font-medium">Total</span>
-                                    <input type="number" value={areaMin} onChange={e => setAreaMin(Number(e.target.value))} className="border border-gray-300 p-1 text-sm bg-white w-full" placeholder="Min" />
-                                    <input type="number" value={areaMax} onChange={e => setAreaMax(Number(e.target.value))} className="border border-gray-300 p-1 text-sm bg-white w-full" placeholder="Max" />
-                                </div>
-                                <div className="flex flex-col gap-1 w-1/2">
-                                    <span className="text-xs text-gray-500 font-medium">Cubierta</span>
-                                    <input type="number" value={areaCubiertaMin} onChange={e => setAreaCubiertaMin(Number(e.target.value))} className="border border-gray-300 p-1 text-sm bg-white w-full" placeholder="Min" />
-                                    <input type="number" value={areaCubiertaMax} onChange={e => setAreaCubiertaMax(Number(e.target.value))} className="border border-gray-300 p-1 text-sm bg-white w-full" placeholder="Max" />
-                                </div>
+                            <div className="flex flex-col gap-2 w-24 ml-1">
+                                <input type="number" value={areaMin} onChange={e => setAreaMin(Number(e.target.value))} className="border border-gray-300 p-1 text-sm bg-white" />
+                                <input type="number" value={areaMax} onChange={e => setAreaMax(Number(e.target.value))} className="border border-gray-300 p-1 text-sm bg-white" />
                             </div>
                         </div>
 
@@ -583,10 +537,8 @@
                 const traces = [];
                 // Agrupar datos por cantidad de ambientes para asignar colores
                 const grouped = data.reduce((acc, item) => {
-                    let r = item.rooms || 'N/A';
-                    if (r >= 6) r = '6+';
-                    
-                    if (!acc[r]) acc[r] = { x: [], y: [], text: [], marker: { color: COLORS[r] || COLORS[6] || '#9ca3af', size: 7, opacity: 0.8 } };
+                    const r = item.rooms || 'N/A';
+                    if (!acc[r]) acc[r] = { x: [], y: [], text: [], marker: { color: COLORS[r] || '#9ca3af', size: 7, opacity: 0.8 } };
                     
                     acc[r].x.push(item.total_area_m2);
                     const valM2 = item.total_area_m2 > 0 ? item.price_value / item.total_area_m2 : 0;
