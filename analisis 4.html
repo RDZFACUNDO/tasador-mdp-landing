@@ -273,7 +273,7 @@
             const [valorMax, setValorMax] = useState(150000);
             const [inmobiliaria, setInmobiliaria] = useState('Todas');
             const [ambientes, setAmbientes] = useState([]);
-            const [barrios, setBarrios] = useState([]);
+            const [barrio, setBarrio] = useState('Todas');
 
             // Opciones únicas extraídas de los datos
             const [opciones, setOpciones] = useState({
@@ -334,7 +334,7 @@
                     }
 
                     if (inmobiliaria !== 'Todas' && item.publisher !== inmobiliaria) return false;
-                    if (barrios.length > 0 && !barrios.includes(item.Barrio)) return false;
+                    if (barrio !== 'Todas' && item.Barrio !== barrio) return false;
                     if (item.price_value < valorMin || item.price_value > valorMax) return false;
 
                     // Lógica de áreas
@@ -353,7 +353,7 @@
 
                     return true;
                 });
-            }, [data, tipos, ambientes, inmobiliaria, barrios, areaMin, areaMax, areaCubiertaMin, areaCubiertaMax, valorMin, valorMax]);
+            }, [data, tipos, ambientes, inmobiliaria, barrio, areaMin, areaMax, areaCubiertaMin, areaCubiertaMax, valorMin, valorMax]);
 
             // KPIs
             const avgValorM2 = useMemo(() => {
@@ -382,13 +382,9 @@
             const locationData = aggregateBy('Barrio');
             const ambientesData = aggregateBy('rooms').map(item => {
                 // Reagrupar para la tabla si es necesario, aunque ya viene agrupado por el valor real
-                let name = item.name;
-                if (name === 'No Identificado' || Number(name) >= 6) {
-                    name = '6+';
-                }
                 return {
                     ...item,
-                    name: name
+                    name: item.name >= 6 ? '6+' : item.name
                 };
             }).reduce((acc, curr) => {
                 // Combinar los 6+ en la tabla
@@ -513,17 +509,10 @@
                             </div>
                             <div className="w-48 pt-2">
                                 <h3 className="font-bold text-teal-800 mb-1">Barrio</h3>
-                                <div className="h-24 overflow-y-auto border border-gray-200 rounded p-1 text-sm table-container">
-                                    {opciones.barrios.map(b => (
-                                        <label key={b} className="flex items-center gap-2 cursor-pointer text-gray-700 hover:bg-gray-50 p-1">
-                                            <input type="checkbox" className="w-4 h-4 accent-teal-700"
-                                                checked={barrios.includes(b)}
-                                                onChange={() => toggleArrayFilter(setBarrios, barrios, b)}
-                                            />
-                                            <span className="truncate" title={b}>{b}</span>
-                                        </label>
-                                    ))}
-                                </div>
+                                <select value={barrio} onChange={e => setBarrio(e.target.value)} className="w-full border-none p-2 text-sm bg-teal-800 text-white outline-none cursor-pointer">
+                                    <option value="Todas">Todas</option>
+                                    {opciones.barrios.map(b => <option key={b} value={b}>{b}</option>)}
+                                </select>
                             </div>
                         </div>
 
@@ -569,79 +558,29 @@
             );
         };
 
-        // Componente de Tabla Reutilizable con Ordenamiento
-        const Table = ({ title, data }) => {
-            const [sortConfig, setSortConfig] = useState({ key: 'quantity', direction: 'desc' });
-
-            const sortedData = useMemo(() => {
-                let sortableItems = [...data];
-                if (sortConfig !== null) {
-                    sortableItems.sort((a, b) => {
-                        let aVal = a[sortConfig.key];
-                        let bVal = b[sortConfig.key];
-                        
-                        // Manejo especial para la columna de nombres (ej. '6+')
-                        if (sortConfig.key === 'name') {
-                            if (a.name === '6+') aVal = 6;
-                            if (b.name === '6+') bVal = 6;
-                            if (typeof aVal === 'string') aVal = aVal.toLowerCase();
-                            if (typeof bVal === 'string') bVal = bVal.toLowerCase();
-                        }
-
-                        if (aVal < bVal) {
-                            return sortConfig.direction === 'asc' ? -1 : 1;
-                        }
-                        if (aVal > bVal) {
-                            return sortConfig.direction === 'asc' ? 1 : -1;
-                        }
-                        return 0;
-                    });
-                }
-                return sortableItems;
-            }, [data, sortConfig]);
-
-            const requestSort = (key) => {
-                let direction = 'desc';
-                if (sortConfig && sortConfig.key === key && sortConfig.direction === 'desc') {
-                    direction = 'asc';
-                }
-                setSortConfig({ key, direction });
-            };
-
-            const getSortIcon = (key) => {
-                if (!sortConfig || sortConfig.key !== key) return '↕';
-                return sortConfig.direction === 'asc' ? '↑' : '↓';
-            };
-
-            return (
-                <div className="flex flex-col h-full">
-                    <div className="flex justify-between font-bold text-teal-800 border-b-[3px] border-gray-300 pb-2 mb-2 text-base">
-                        <span className="cursor-pointer hover:text-teal-600" onClick={() => requestSort('name')}>
-                            {title} <span className="text-xs text-gray-400">{getSortIcon('name')}</span>
-                        </span>
-                        <div className="flex gap-6">
-                            <span className="cursor-pointer hover:text-teal-600" onClick={() => requestSort('avgM2')}>
-                                Valor M2 <span className="text-xs text-gray-400">{getSortIcon('avgM2')}</span>
-                            </span>
-                            <span className="cursor-pointer hover:text-teal-600" onClick={() => requestSort('quantity')}>
-                                Quantity <span className="text-xs text-gray-400">{getSortIcon('quantity')}</span>
-                            </span>
-                        </div>
-                    </div>
-                    <div className="flex-1 overflow-y-auto table-container text-sm pr-1">
-                        {sortedData.map((row, idx) => (
-                            <div key={idx} className={`flex justify-between p-2 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-100'}`}>
-                                <span className="truncate w-1/2 text-gray-700" title={row.name}>{row.name}</span>
-                                <div className="flex gap-6 w-1/2 justify-end text-gray-700">
-                                    <span className="w-16 text-right">{formatNumber(row.avgM2)}</span>
-                                    <span className="w-16 text-right">{formatNumber(row.quantity)}</span>
-                                </div>
-                            </div>
-                        ))}
+        // Componente de Tabla Reutilizable
+        const Table = ({ title, data }) => (
+            <div className="flex flex-col h-full">
+                <div className="flex justify-between font-bold text-teal-800 border-b-[3px] border-gray-300 pb-2 mb-2 text-base">
+                    <span>{title}</span>
+                    <div className="flex gap-6">
+                        <span>Valor M2</span>
+                        <span>Quantity</span>
                     </div>
                 </div>
-            );
-        };
+                <div className="flex-1 overflow-y-auto table-container text-sm pr-1">
+                    {data.map((row, idx) => (
+                        <div key={idx} className={`flex justify-between p-2 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-100'}`}>
+                            <span className="truncate w-1/2 text-gray-700" title={row.name}>{row.name}</span>
+                            <div className="flex gap-6 w-1/2 justify-end text-gray-700">
+                                <span className="w-16 text-right">{formatNumber(row.avgM2)}</span>
+                                <span className="w-16 text-right">{formatNumber(row.quantity)}</span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
 
         // Componente del Gráfico Plotly
         const ScatterPlot = ({ data }) => {
