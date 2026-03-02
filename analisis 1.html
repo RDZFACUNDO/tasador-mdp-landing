@@ -267,11 +267,13 @@
             const [tipos, setTipos] = useState([]);
             const [areaMin, setAreaMin] = useState(20);
             const [areaMax, setAreaMax] = useState(240);
+            const [areaCubiertaMin, setAreaCubiertaMin] = useState(20);
+            const [areaCubiertaMax, setAreaCubiertaMax] = useState(240);
             const [valorMin, setValorMin] = useState(50000);
             const [valorMax, setValorMax] = useState(150000);
             const [inmobiliaria, setInmobiliaria] = useState('Todas');
             const [ambientes, setAmbientes] = useState([]);
-            const [barrio, setBarrio] = useState('Todas');
+            const [barrios, setBarrios] = useState([]);
 
             // Opciones únicas extraídas de los datos
             const [opciones, setOpciones] = useState({
@@ -300,10 +302,10 @@
                         setData(finalData);
 
                         // Extraer opciones únicas para los filtros
-                        const uniqueTipos = [...new Set(finalData.map(d => d.type_subtitle).filter(Boolean))].sort();
+                        const uniqueTipos = ['Casa', 'Departamento', 'Desarrollo', 'Local', 'Oficina', 'PH'];
                         const uniqueInmobiliarias = [...new Set(finalData.map(d => d.publisher).filter(Boolean))].sort();
                         const uniqueBarrios = [...new Set(finalData.map(d => d.Barrio).filter(Boolean))].sort();
-                        const uniqueAmbientes = [...new Set(finalData.map(d => d.rooms).filter(Boolean))].sort((a,b)=>a-b);
+                        const uniqueAmbientes = ['1', '2', '3', '4', '5', '6+'];
 
                         setOpciones({
                             tipos: uniqueTipos,
@@ -325,14 +327,33 @@
             const filteredData = useMemo(() => {
                 return data.filter(item => {
                     if (tipos.length > 0 && !tipos.includes(item.type_subtitle)) return false;
-                    if (ambientes.length > 0 && !ambientes.includes(item.rooms)) return false;
+                    
+                    if (ambientes.length > 0) {
+                        const itemRooms = item.rooms >= 6 ? '6+' : String(item.rooms);
+                        if (!ambientes.includes(itemRooms)) return false;
+                    }
+
                     if (inmobiliaria !== 'Todas' && item.publisher !== inmobiliaria) return false;
-                    if (barrio !== 'Todas' && item.Barrio !== barrio) return false;
-                    if (item.total_area_m2 < areaMin || item.total_area_m2 > areaMax) return false;
+                    if (barrios.length > 0 && !barrios.includes(item.Barrio)) return false;
                     if (item.price_value < valorMin || item.price_value > valorMax) return false;
+
+                    // Lógica de áreas
+                    const isSameAreaType = ['Desarrollo', 'Oficina', 'PH', 'Departamento'].includes(item.type_subtitle);
+                    
+                    if (isSameAreaType) {
+                        // Si es de estos tipos, el área total y cubierta deben ser iguales y cumplir con ambos rangos
+                        if (item.total_area_m2 < areaMin || item.total_area_m2 > areaMax) return false;
+                        if (item.total_area_m2 < areaCubiertaMin || item.total_area_m2 > areaCubiertaMax) return false;
+                    } else {
+                        // Si es Casa o Local, se evalúan por separado (asumiendo que tienes un campo covered_area_m2, si no, usamos total_area_m2 como fallback)
+                        const coveredArea = item.covered_area_m2 || item.total_area_m2;
+                        if (item.total_area_m2 < areaMin || item.total_area_m2 > areaMax) return false;
+                        if (coveredArea < areaCubiertaMin || coveredArea > areaCubiertaMax) return false;
+                    }
+
                     return true;
                 });
-            }, [data, tipos, ambientes, inmobiliaria, barrio, areaMin, areaMax, valorMin, valorMax]);
+            }, [data, tipos, ambientes, inmobiliaria, barrios, areaMin, areaMax, areaCubiertaMin, areaCubiertaMax, valorMin, valorMax]);
 
             // KPIs
             const avgValorM2 = useMemo(() => {
@@ -359,7 +380,28 @@
 
             const realEstateData = aggregateBy('publisher');
             const locationData = aggregateBy('Barrio');
-            const ambientesData = aggregateBy('rooms');
+            const ambientesData = aggregateBy('rooms').map(item => {
+                // Reagrupar para la tabla si es necesario, aunque ya viene agrupado por el valor real
+                let name = item.name;
+                if (name === 'No Identificado' || Number(name) >= 6) {
+                    name = '6+';
+                }
+                return {
+                    ...item,
+                    name: name
+                };
+            }).reduce((acc, curr) => {
+                // Combinar los 6+ en la tabla
+                const existing = acc.find(x => x.name === curr.name);
+                if (existing) {
+                    const totalQuantity = existing.quantity + curr.quantity;
+                    existing.avgM2 = Math.round(((existing.avgM2 * existing.quantity) + (curr.avgM2 * curr.quantity)) / totalQuantity);
+                    existing.quantity = totalQuantity;
+                } else {
+                    acc.push(curr);
+                }
+                return acc;
+            }, []).sort((a, b) => (a.name === '6+' ? 1 : b.name === '6+' ? -1 : a.name - b.name));
 
             const toggleArrayFilter = (setter, array, value) => {
                 setter(array.includes(value) ? array.filter(v => v !== value) : [...array, value]);
@@ -371,11 +413,6 @@
                 <div className="flex h-full w-full bg-white">
                     {/* Panel Lateral Izquierdo */}
                     <div className="w-64 bg-gray-50 p-5 flex flex-col gap-6 overflow-y-auto border-r border-gray-200 shrink-0">
-                        <div className="text-left">
-                            <h1 className="text-4xl font-bold text-teal-800 underline decoration-4 underline-offset-4 mb-1">Price</h1>
-                            <h1 className="text-4xl font-bold text-teal-800 underline decoration-4 underline-offset-4">Analysis</h1>
-                        </div>
-
                         {/* Filtro: Tipo */}
                         <div>
                             <h3 className="font-bold text-teal-800 text-lg mb-2">Tipo</h3>
@@ -395,9 +432,17 @@
                         {/* Filtro: Area M2 */}
                         <div>
                             <h3 className="font-bold text-teal-800 text-lg mb-2">Area M2</h3>
-                            <div className="flex flex-col gap-2 w-24 ml-1">
-                                <input type="number" value={areaMin} onChange={e => setAreaMin(Number(e.target.value))} className="border border-gray-300 p-1 text-sm bg-white" />
-                                <input type="number" value={areaMax} onChange={e => setAreaMax(Number(e.target.value))} className="border border-gray-300 p-1 text-sm bg-white" />
+                            <div className="flex gap-2">
+                                <div className="flex flex-col gap-1 w-1/2">
+                                    <span className="text-xs text-gray-500 font-medium">Total</span>
+                                    <input type="number" value={areaMin} onChange={e => setAreaMin(Number(e.target.value))} className="border border-gray-300 p-1 text-sm bg-white w-full" placeholder="Min" />
+                                    <input type="number" value={areaMax} onChange={e => setAreaMax(Number(e.target.value))} className="border border-gray-300 p-1 text-sm bg-white w-full" placeholder="Max" />
+                                </div>
+                                <div className="flex flex-col gap-1 w-1/2">
+                                    <span className="text-xs text-gray-500 font-medium">Cubierta</span>
+                                    <input type="number" value={areaCubiertaMin} onChange={e => setAreaCubiertaMin(Number(e.target.value))} className="border border-gray-300 p-1 text-sm bg-white w-full" placeholder="Min" />
+                                    <input type="number" value={areaCubiertaMax} onChange={e => setAreaCubiertaMax(Number(e.target.value))} className="border border-gray-300 p-1 text-sm bg-white w-full" placeholder="Max" />
+                                </div>
                             </div>
                         </div>
 
@@ -451,13 +496,34 @@
                                         </div>
                                     ))}
                                 </div>
+                                <div className="flex items-center justify-center gap-6 text-sm font-medium text-gray-600 mt-2">
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                                        <span>Sobrevalorado (+1 SD)</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                                        <span>Oportunidad (-1 SD)</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-4 border-b-2 border-gray-600"></div>
+                                        <span>Regresión</span>
+                                    </div>
+                                </div>
                             </div>
                             <div className="w-48 pt-2">
                                 <h3 className="font-bold text-teal-800 mb-1">Barrio</h3>
-                                <select value={barrio} onChange={e => setBarrio(e.target.value)} className="w-full border-none p-2 text-sm bg-teal-800 text-white outline-none cursor-pointer">
-                                    <option value="Todas">Todas</option>
-                                    {opciones.barrios.map(b => <option key={b} value={b}>{b}</option>)}
-                                </select>
+                                <div className="h-24 overflow-y-auto border border-gray-200 rounded p-1 text-sm table-container">
+                                    {opciones.barrios.map(b => (
+                                        <label key={b} className="flex items-center gap-2 cursor-pointer text-gray-700 hover:bg-gray-50 p-1">
+                                            <input type="checkbox" className="w-4 h-4 accent-teal-700"
+                                                checked={barrios.includes(b)}
+                                                onChange={() => toggleArrayFilter(setBarrios, barrios, b)}
+                                            />
+                                            <span className="truncate" title={b}>{b}</span>
+                                        </label>
+                                    ))}
+                                </div>
                             </div>
                         </div>
 
@@ -479,12 +545,27 @@
                         </div>
 
                         {/* Tablas Inferiores */}
-                        <div className="h-64 grid grid-cols-4 gap-6">
-                            <Table title="Real Estate" data={realEstateData} />
-                            <Table title="Location" data={locationData} />
-                            <Table title="Ambientes" data={ambientesData} />
-                            <div className="flex flex-col h-full">
-                                <div className="flex justify-center font-bold text-teal-800 border-b-[3px] border-gray-300 pb-2 mb-2 text-base">
+                        <div className="h-72 grid grid-cols-4 gap-6 min-h-0">
+                            <Table 
+                                title="Real Estate" 
+                                data={realEstateData} 
+                                onRowClick={(name) => setInmobiliaria(inmobiliaria === name ? 'Todas' : name)}
+                                activeFilters={inmobiliaria}
+                            />
+                            <Table 
+                                title="Location" 
+                                data={locationData} 
+                                onRowClick={(name) => toggleArrayFilter(setBarrios, barrios, name)}
+                                activeFilters={barrios}
+                            />
+                            <Table 
+                                title="Ambientes" 
+                                data={ambientesData} 
+                                onRowClick={(name) => toggleArrayFilter(setAmbientes, ambientes, name)}
+                                activeFilters={ambientes}
+                            />
+                            <div className="flex flex-col h-full min-h-0">
+                                <div className="flex justify-center font-bold text-teal-800 border-b-[3px] border-gray-300 pb-2 mb-2 text-base shrink-0">
                                     <span>Link</span>
                                 </div>
                                 <div className="flex-1 overflow-y-auto table-container text-xs pr-2">
@@ -503,29 +584,84 @@
             );
         };
 
-        // Componente de Tabla Reutilizable
-        const Table = ({ title, data }) => (
-            <div className="flex flex-col h-full">
-                <div className="flex justify-between font-bold text-teal-800 border-b-[3px] border-gray-300 pb-2 mb-2 text-base">
-                    <span>{title}</span>
-                    <div className="flex gap-6">
-                        <span>Valor M2</span>
-                        <span>Quantity</span>
+        // Componente de Tabla Reutilizable con Ordenamiento
+        const Table = ({ title, data, onRowClick, activeFilters = [] }) => {
+            const [sortConfig, setSortConfig] = useState({ key: 'quantity', direction: 'desc' });
+
+            const sortedData = useMemo(() => {
+                let sortableItems = [...data];
+                if (sortConfig !== null) {
+                    sortableItems.sort((a, b) => {
+                        let aVal = a[sortConfig.key];
+                        let bVal = b[sortConfig.key];
+                        
+                        // Manejo especial para la columna de nombres (ej. '6+')
+                        if (sortConfig.key === 'name') {
+                            if (a.name === '6+') aVal = 6;
+                            if (b.name === '6+') bVal = 6;
+                            if (typeof aVal === 'string') aVal = aVal.toLowerCase();
+                            if (typeof bVal === 'string') bVal = bVal.toLowerCase();
+                        }
+
+                        if (aVal < bVal) {
+                            return sortConfig.direction === 'asc' ? -1 : 1;
+                        }
+                        if (aVal > bVal) {
+                            return sortConfig.direction === 'asc' ? 1 : -1;
+                        }
+                        return 0;
+                    });
+                }
+                return sortableItems;
+            }, [data, sortConfig]);
+
+            const requestSort = (key) => {
+                let direction = 'desc';
+                if (sortConfig && sortConfig.key === key && sortConfig.direction === 'desc') {
+                    direction = 'asc';
+                }
+                setSortConfig({ key, direction });
+            };
+
+            return (
+                <div className="flex flex-col h-full min-h-0">
+                    <div className="flex justify-between font-bold text-teal-800 border-b-[3px] border-gray-300 pb-2 mb-2 text-base shrink-0">
+                        <span className="cursor-pointer hover:text-teal-600" onClick={() => requestSort('name')}>
+                            {title}
+                        </span>
+                        <div className="flex gap-6">
+                            <span className="cursor-pointer hover:text-teal-600" onClick={() => requestSort('avgM2')}>
+                                Valor M2
+                            </span>
+                            <span className="cursor-pointer hover:text-teal-600" onClick={() => requestSort('quantity')}>
+                                Quantity
+                            </span>
+                        </div>
+                    </div>
+                    <div className="flex-1 overflow-y-auto table-container text-sm pr-1">
+                        {sortedData.map((row, idx) => {
+                            const isActive = Array.isArray(activeFilters) 
+                                ? activeFilters.includes(row.name) 
+                                : activeFilters === row.name;
+                            
+                            return (
+                                <div 
+                                    key={idx} 
+                                    onClick={() => onRowClick && onRowClick(row.name)}
+                                    className={`flex justify-between p-2 cursor-pointer transition-colors ${isActive ? 'bg-teal-100 border-l-4 border-teal-600' : (idx % 2 === 0 ? 'bg-white' : 'bg-gray-100')} hover:bg-teal-50`}
+                                >
+                                    <span className="truncate w-1/2 text-gray-800 font-medium" title={row.name}>{row.name}</span>
+                                    <div className="flex gap-6 w-1/2 justify-end text-gray-700">
+                                        <span className="w-16 text-right">{formatNumber(row.avgM2)}</span>
+                                        <span className="w-16 text-right">{formatNumber(row.quantity)}</span>
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
-                <div className="flex-1 overflow-y-auto table-container text-sm pr-1">
-                    {data.map((row, idx) => (
-                        <div key={idx} className={`flex justify-between p-2 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-100'}`}>
-                            <span className="truncate w-1/2 text-gray-700" title={row.name}>{row.name}</span>
-                            <div className="flex gap-6 w-1/2 justify-end text-gray-700">
-                                <span className="w-16 text-right">{formatNumber(row.avgM2)}</span>
-                                <span className="w-16 text-right">{formatNumber(row.quantity)}</span>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        );
+            );
+        };
 
         // Componente del Gráfico Plotly
         const ScatterPlot = ({ data }) => {
@@ -535,17 +671,95 @@
                 if (!plotRef.current) return;
 
                 const traces = [];
+                
+                // 1. Calcular Regresión Lineal y Desviación Estándar
+                let m = 0, b = 0, sd = 0, minX = 0, maxX = 0;
+                const validData = data.filter(d => d.total_area_m2 > 0 && d.price_value > 0);
+                
+                if (validData.length > 1) {
+                    const N = validData.length;
+                    let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+                    
+                    validData.forEach(d => {
+                        const x = d.total_area_m2;
+                        const y = d.price_value / x;
+                        sumX += x;
+                        sumY += y;
+                        sumXY += x * y;
+                        sumX2 += x * x;
+                    });
+                    
+                    m = (N * sumXY - sumX * sumY) / (N * sumX2 - sumX * sumX);
+                    b = (sumY - m * sumX) / N;
+                    
+                    let sumSqRes = 0;
+                    validData.forEach(d => {
+                        const x = d.total_area_m2;
+                        const y = d.price_value / x;
+                        const predY = m * x + b;
+                        const res = y - predY;
+                        sumSqRes += res * res;
+                    });
+                    
+                    sd = Math.sqrt(sumSqRes / N);
+                    minX = Math.min(...validData.map(d => d.total_area_m2));
+                    maxX = Math.max(...validData.map(d => d.total_area_m2));
+                    
+                    // Agregar líneas de regresión y márgenes
+                    traces.push({
+                        x: [minX, maxX],
+                        y: [m * minX + b, m * maxX + b],
+                        mode: 'lines',
+                        type: 'scatter',
+                        name: 'Regresión',
+                        line: { color: '#4b5563', width: 2 },
+                        hoverinfo: 'name'
+                    });
+                    traces.push({
+                        x: [minX, maxX],
+                        y: [m * minX + b + sd, m * maxX + b + sd],
+                        mode: 'lines',
+                        type: 'scatter',
+                        name: '+1 SD',
+                        line: { color: '#ef4444', width: 1, dash: 'dash' },
+                        hoverinfo: 'none'
+                    });
+                    traces.push({
+                        x: [minX, maxX],
+                        y: [m * minX + b - sd, m * maxX + b - sd],
+                        mode: 'lines',
+                        type: 'scatter',
+                        name: '-1 SD',
+                        line: { color: '#22c55e', width: 1, dash: 'dash' },
+                        hoverinfo: 'none'
+                    });
+                }
+
                 // Agrupar datos por cantidad de ambientes para asignar colores
                 const grouped = data.reduce((acc, item) => {
-                    const r = item.rooms || 'N/A';
-                    if (!acc[r]) acc[r] = { x: [], y: [], text: [], marker: { color: COLORS[r] || '#9ca3af', size: 7, opacity: 0.8 } };
+                    let r = item.rooms || 'N/A';
+                    if (r >= 6) r = '6+';
                     
-                    acc[r].x.push(item.total_area_m2);
-                    const valM2 = item.total_area_m2 > 0 ? item.price_value / item.total_area_m2 : 0;
-                    acc[r].y.push(valM2);
+                    if (!acc[r]) acc[r] = { x: [], y: [], text: [], customdata: [], colors: [] };
+                    
+                    const x = item.total_area_m2;
+                    const y = x > 0 ? item.price_value / x : 0;
+                    
+                    acc[r].x.push(x);
+                    acc[r].y.push(y);
                     
                     // Texto al pasar el mouse
                     acc[r].text.push(`Barrio: ${item.Barrio || 'N/A'}<br>URL: ${item.url || 'N/A'}`);
+                    acc[r].customdata.push(item.url); // Guardar URL para el click
+                    
+                    // Determinar color según desviación estándar
+                    let ptColor = COLORS[r] || COLORS[6] || '#9ca3af';
+                    if (validData.length > 1) {
+                        const predY = m * x + b;
+                        if (y > predY + sd) ptColor = '#ef4444'; // Rojo (Sobrevalorado)
+                        else if (y < predY - sd) ptColor = '#22c55e'; // Verde (Oportunidad)
+                    }
+                    acc[r].colors.push(ptColor);
                     
                     return acc;
                 }, {});
@@ -555,10 +769,11 @@
                         x: traceData.x,
                         y: traceData.y,
                         text: traceData.text,
+                        customdata: traceData.customdata,
                         mode: 'markers',
                         type: 'scatter',
                         name: rooms,
-                        marker: traceData.marker,
+                        marker: { color: traceData.colors, size: 7, opacity: 0.8 },
                         hoverinfo: 'text'
                     });
                 }
@@ -591,12 +806,27 @@
 
                 Plotly.newPlot(plotRef.current, traces, layout, config);
 
+                // Agregar evento de click
+                const clickHandler = (eventData) => {
+                    if (eventData.points && eventData.points.length > 0) {
+                        const url = eventData.points[0].customdata;
+                        if (url && url !== 'N/A') {
+                            window.open(url, '_blank');
+                        }
+                    }
+                };
+                
+                plotRef.current.on('plotly_click', clickHandler);
+
                 return () => {
+                    if (plotRef.current && plotRef.current.removeAllListeners) {
+                        plotRef.current.removeAllListeners('plotly_click');
+                    }
                     Plotly.purge(plotRef.current);
                 };
             }, [data]);
 
-            return <div ref={plotRef} className="w-full h-full" />;
+            return <div ref={plotRef} className="w-full h-full cursor-pointer" />;
         };
 
         // Función para generar datos de prueba si falla la conexión a Supabase

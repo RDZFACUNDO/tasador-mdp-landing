@@ -358,7 +358,10 @@
             // KPIs
             const avgValorM2 = useMemo(() => {
                 if (filteredData.length === 0) return 0;
-                const sum = filteredData.reduce((acc, item) => acc + (item.price_value / item.total_area_m2), 0);
+                const sum = filteredData.reduce((acc, item) => {
+                    const area = item.covered_area_m2 || item.total_area_m2 || 1;
+                    return acc + (item.price_value / area);
+                }, 0);
                 return Math.round(sum / filteredData.length);
             }, [filteredData]);
 
@@ -369,7 +372,8 @@
                     const val = item[key] || 'No Identificado';
                     if (!groups[val]) groups[val] = { count: 0, sumM2: 0 };
                     groups[val].count += 1;
-                    groups[val].sumM2 += (item.price_value / item.total_area_m2);
+                    const area = item.covered_area_m2 || item.total_area_m2 || 1;
+                    groups[val].sumM2 += (item.price_value / area);
                 });
                 return Object.keys(groups).map(k => ({
                     name: k,
@@ -674,7 +678,7 @@
                 
                 // 1. Calcular Regresión Lineal y Desviación Estándar
                 let m = 0, b = 0, sd = 0, minX = 0, maxX = 0;
-                const validData = data.filter(d => d.total_area_m2 > 0 && d.price_value > 0);
+                const validData = data.filter(d => (d.covered_area_m2 > 0 || d.total_area_m2 > 0) && d.price_value > 0);
                 
                 if (validData.length > 1) {
                     const N = validData.length;
@@ -682,7 +686,8 @@
                     
                     validData.forEach(d => {
                         const x = d.total_area_m2;
-                        const y = d.price_value / x;
+                        const areaForPrice = d.covered_area_m2 || d.total_area_m2 || 1;
+                        const y = d.price_value / areaForPrice;
                         sumX += x;
                         sumY += y;
                         sumXY += x * y;
@@ -695,7 +700,8 @@
                     let sumSqRes = 0;
                     validData.forEach(d => {
                         const x = d.total_area_m2;
-                        const y = d.price_value / x;
+                        const areaForPrice = d.covered_area_m2 || d.total_area_m2 || 1;
+                        const y = d.price_value / areaForPrice;
                         const predY = m * x + b;
                         const res = y - predY;
                         sumSqRes += res * res;
@@ -743,7 +749,8 @@
                     if (!acc[r]) acc[r] = { x: [], y: [], text: [], customdata: [], colors: [] };
                     
                     const x = item.total_area_m2;
-                    const y = x > 0 ? item.price_value / x : 0;
+                    const areaForPrice = item.covered_area_m2 || item.total_area_m2 || 1;
+                    const y = areaForPrice > 0 ? item.price_value / areaForPrice : 0;
                     
                     acc[r].x.push(x);
                     acc[r].y.push(y);
