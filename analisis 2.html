@@ -411,33 +411,6 @@
                 setter(array.includes(value) ? array.filter(v => v !== value) : [...array, value]);
             };
 
-            const [linkSortConfig, setLinkSortConfig] = useState({ key: 'views', direction: 'desc' });
-
-            const sortedLinks = useMemo(() => {
-                let sortableLinks = [...filteredData];
-                sortableLinks.sort((a, b) => {
-                    let aVal = a[linkSortConfig.key] || 0;
-                    let bVal = b[linkSortConfig.key] || 0;
-                    
-                    if (aVal < bVal) {
-                        return linkSortConfig.direction === 'asc' ? -1 : 1;
-                    }
-                    if (aVal > bVal) {
-                        return linkSortConfig.direction === 'asc' ? 1 : -1;
-                    }
-                    return 0;
-                });
-                return sortableLinks;
-            }, [filteredData, linkSortConfig]);
-
-            const requestLinkSort = (key) => {
-                let direction = 'desc';
-                if (linkSortConfig.key === key && linkSortConfig.direction === 'desc') {
-                    direction = 'asc';
-                }
-                setLinkSortConfig({ key, direction });
-            };
-
             if (loading) return <div className="flex items-center justify-center h-full text-2xl text-teal-800 font-bold">Cargando Dashboard...</div>;
 
             return (
@@ -596,23 +569,15 @@
                                 activeFilters={ambientes}
                             />
                             <div className="flex flex-col h-full min-h-0">
-                                <div className="flex justify-between font-bold text-teal-800 border-b-[3px] border-gray-300 pb-2 mb-2 text-base shrink-0">
-                                    <span className="cursor-pointer hover:text-teal-600" onClick={() => requestLinkSort('url')}>
-                                        Link
-                                    </span>
-                                    <span className="cursor-pointer hover:text-teal-600" onClick={() => requestLinkSort('views')}>
-                                        Views
-                                    </span>
+                                <div className="flex justify-center font-bold text-teal-800 border-b-[3px] border-gray-300 pb-2 mb-2 text-base shrink-0">
+                                    <span>Link</span>
                                 </div>
                                 <div className="flex-1 overflow-y-auto table-container text-xs pr-2">
-                                    {sortedLinks.slice(0, 100).map((item, idx) => (
-                                        <div key={idx} className={`flex justify-between items-center p-1.5 border-b border-gray-200 hover:bg-teal-50 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                                            <a href={item.url} target="_blank" rel="noreferrer" className="truncate text-gray-600 hover:text-teal-700 transition-colors w-3/4" title={item.url}>
+                                    {filteredData.slice(0, 100).map((item, idx) => (
+                                        <div key={idx} className="truncate p-1.5 border-b border-gray-200 hover:bg-gray-50">
+                                            <a href={item.url} target="_blank" rel="noreferrer" className="text-gray-600 hover:text-teal-700 transition-colors">
                                                 {item.url || 'Sin enlace'}
                                             </a>
-                                            <span className="w-1/4 text-right text-gray-700 font-medium">
-                                                {item.views || 0}
-                                            </span>
                                         </div>
                                     ))}
                                 </div>
