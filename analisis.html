@@ -7,8 +7,8 @@
     
     <meta name="description" content="Valuador de propiedades online en Mar del Plata. Conocé el valor de venta de tu inmueble con inteligencia de datos, mapas de calor y reportes de mercado actualizados.">
     
-    <link rel="icon" href="./images/Logo.png" type="image/jpeg">
-    <link rel="apple-touch-icon" href="./images/Logo.png">
+    <link rel="icon" href="./images/Logo 4.jpg" type="image/jpeg">
+    <link rel="apple-touch-icon" href="./images/Logo 4.jpg">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -259,6 +259,64 @@
 
         const formatNumber = (num) => new Intl.NumberFormat('en-US').format(num);
 
+        // Funciones de caché con IndexedDB para almacenar datos localmente
+        const DB_NAME = 'RealEstateDashboard';
+        const STORE_NAME = 'cache';
+        const CACHE_KEY = 'propiedades_mdp';
+        const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 horas en milisegundos
+
+        const openDB = () => {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, 1);
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME);
+                    }
+                };
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        };
+
+        const getCachedData = async () => {
+            try {
+                const db = await openDB();
+                return new Promise((resolve) => {
+                    const tx = db.transaction(STORE_NAME, 'readonly');
+                    const store = tx.objectStore(STORE_NAME);
+                    const request = store.get(CACHE_KEY);
+                    request.onsuccess = () => {
+                        const result = request.result;
+                        if (result && (Date.now() - result.timestamp < CACHE_TTL)) {
+                            resolve(result.data);
+                        } else {
+                            resolve(null);
+                        }
+                    };
+                    request.onerror = () => resolve(null);
+                });
+            } catch (e) {
+                console.error("Error leyendo caché:", e);
+                return null;
+            }
+        };
+
+        const setCachedData = async (data) => {
+            try {
+                const db = await openDB();
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction(STORE_NAME, 'readwrite');
+                    const store = tx.objectStore(STORE_NAME);
+                    const request = store.put({ timestamp: Date.now(), data: data }, CACHE_KEY);
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            } catch (e) {
+                console.error("Error guardando caché:", e);
+            }
+        };
+
         const App = () => {
             const [data, setData] = useState([]);
             const [loading, setLoading] = useState(true);
@@ -286,37 +344,61 @@
             useEffect(() => {
                 const fetchData = async () => {
                     try {
-                        // Intentar obtener datos reales de Supabase
-                        const { data: supaData, error } = await supabaseClient
-                            .from('propiedades_mdp')
-                            .select('*');
-                        
-                        let finalData = supaData;
+                        const processData = (finalData) => {
+                            setData(finalData);
+                            const uniqueTipos = ['Casa', 'Departamento', 'Desarrollo', 'Local', 'Oficina', 'PH'];
+                            const uniqueInmobiliarias = [...new Set(finalData.map(d => d.publisher).filter(Boolean))].sort();
+                            const uniqueBarrios = [...new Set(finalData.map(d => d.Barrio).filter(Boolean))].sort();
+                            const uniqueAmbientes = ['1', '2', '3', '4', '5', '6+'];
 
-                        // Si hay error (ej. falta la key) o no hay datos, usamos mock data para que el dashboard funcione
-                        if (error || !supaData || supaData.length === 0) {
-                            console.warn("No se pudo obtener datos de Supabase o la tabla está vacía. Usando datos de prueba. Asegúrate de poner tu TU_ANON_KEY.");
-                            finalData = generateMockData();
+                            setOpciones({
+                                tipos: uniqueTipos,
+                                inmobiliarias: uniqueInmobiliarias,
+                                barrios: uniqueBarrios,
+                                ambientes: uniqueAmbientes
+                            });
+                            setLoading(false);
+                        };
+
+                        // 1. Intentar obtener datos de la caché local
+                        const cachedData = await getCachedData();
+                        if (cachedData) {
+                            console.log("Cargando datos desde caché local (válida por 24hs)...");
+                            processData(cachedData);
+                            return;
                         }
 
-                        setData(finalData);
+                        console.log("Obteniendo datos desde la API...");
+                        // 2. Si no hay caché o expiró, obtener de la API (que maneja la caché de Vercel y Supabase)
+                        let allData = [];
+                        let fetchError = null;
 
-                        // Extraer opciones únicas para los filtros
-                        const uniqueTipos = ['Casa', 'Departamento', 'Desarrollo', 'Local', 'Oficina', 'PH'];
-                        const uniqueInmobiliarias = [...new Set(finalData.map(d => d.publisher).filter(Boolean))].sort();
-                        const uniqueBarrios = [...new Set(finalData.map(d => d.Barrio).filter(Boolean))].sort();
-                        const uniqueAmbientes = ['1', '2', '3', '4', '5', '6+'];
+                        try {
+                            const response = await fetch('/api/propiedades');
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+                            allData = await response.json();
+                        } catch (error) {
+                            fetchError = error;
+                        }
+                        
+                        let finalData = allData;
 
-                        setOpciones({
-                            tipos: uniqueTipos,
-                            inmobiliarias: uniqueInmobiliarias,
-                            barrios: uniqueBarrios,
-                            ambientes: uniqueAmbientes
-                        });
+                        // Si hay error o no hay datos, usamos mock data
+                        if (fetchError || allData.length === 0) {
+                            console.warn("No se pudo obtener datos de la API. Usando datos de prueba.", fetchError);
+                            finalData = generateMockData();
+                        } else {
+                            // 3. Guardar en caché si la consulta fue exitosa
+                            await setCachedData(allData);
+                            console.log("Datos guardados en caché local.");
+                        }
+
+                        processData(finalData);
 
                     } catch (err) {
                         console.error("Error:", err);
-                    } finally {
                         setLoading(false);
                     }
                 };
@@ -544,7 +626,7 @@
                             </div>
                             <div className="w-48 pt-2">
                                 <h3 className="font-bold text-teal-800 mb-1">Barrio</h3>
-                                <div className="h-24 overflow-y-auto border border-gray-200 rounded p-1 text-sm table-container">
+                                <div className="h-48 overflow-y-auto border border-gray-200 rounded p-1 text-sm table-container">
                                     {opciones.barrios.map(b => (
                                         <label key={b} className="flex items-center gap-2 cursor-pointer text-gray-700 hover:bg-gray-50 p-1">
                                             <input type="checkbox" className="w-4 h-4 accent-teal-700"
@@ -823,7 +905,8 @@
                 const layout = {
                     margin: { t: 20, l: 60, r: 20, b: 40 },
                     xaxis: { 
-                        title: 'Area M2', 
+                        title: 'Area M2 (Log)', 
+                        type: 'log',
                         showgrid: true, 
                         gridcolor: '#f3f4f6', 
                         zeroline: false,
