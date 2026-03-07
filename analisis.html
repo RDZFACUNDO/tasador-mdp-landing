@@ -231,7 +231,7 @@
 
     <!-- Contenedor del Dashboard -->
     <div class="max-w-[1400px] mx-auto my-10 px-4">
-        <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200" style="height: 850px;">
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200" style="height: 1000px;">
             <div id="root" class="h-full w-full"></div>
     
     <script type="text/babel">
@@ -795,7 +795,26 @@
                 
                 // 1. Calcular Regresión Lineal y Desviación Estándar
                 let m = 0, b = 0, sd = 0, minX = 0, maxX = 0;
-                const validData = data.filter(d => (d.covered_area_m2 > 0 || d.total_area_m2 > 0) && d.price_value > 0);
+                let validData = data.filter(d => (d.covered_area_m2 > 0 || d.total_area_m2 > 0) && d.price_value > 0);
+                
+                // Filtrar outliers extremos para no romper el gráfico
+                if (validData.length > 4) {
+                    const yValues = validData.map(d => {
+                        const areaForPrice = d.covered_area_m2 || d.total_area_m2 || 1;
+                        return d.price_value / areaForPrice;
+                    }).sort((a, b) => a - b);
+                    
+                    const q1 = yValues[Math.floor(yValues.length * 0.25)];
+                    const q3 = yValues[Math.floor(yValues.length * 0.75)];
+                    const iqr = q3 - q1;
+                    const maxY = q3 + 3 * iqr; // Umbral para outliers
+                    
+                    validData = validData.filter(d => {
+                        const areaForPrice = d.covered_area_m2 || d.total_area_m2 || 1;
+                        const y = d.price_value / areaForPrice;
+                        return y <= maxY;
+                    });
+                }
                 
                 if (validData.length > 1) {
                     const N = validData.length;
@@ -859,7 +878,7 @@
                 }
 
                 // Agrupar datos por cantidad de ambientes para asignar colores
-                const grouped = data.reduce((acc, item) => {
+                const grouped = validData.reduce((acc, item) => {
                     let r = item.rooms || 'N/A';
                     if (r >= 6) r = '6+';
                     
@@ -873,7 +892,7 @@
                     acc[r].y.push(y);
                     
                     // Texto al pasar el mouse
-                    acc[r].text.push(`Barrio: ${item.Barrio || 'N/A'}<br>URL: ${item.url || 'N/A'}`);
+                    acc[r].text.push(`Barrio: ${item.Barrio || 'N/A'}<br>Click para ver propiedad`);
                     acc[r].customdata.push(item.url); // Guardar URL para el click
                     
                     // Determinar color según desviación estándar
@@ -924,7 +943,13 @@
                     showlegend: false,
                     plot_bgcolor: 'white',
                     paper_bgcolor: 'white',
-                    hovermode: 'closest'
+                    hovermode: 'closest',
+                    hoverlabel: {
+                        bgcolor: 'white',
+                        font: { size: 12, family: 'Roboto' },
+                        bordercolor: '#e5e7eb',
+                        align: 'left'
+                    }
                 };
 
                 const config = { responsive: true, displayModeBar: false };
