@@ -422,12 +422,15 @@
                     // Lógica de áreas
                     const isSameAreaType = ['Desarrollo', 'Oficina', 'PH', 'Departamento'].includes(item.type_subtitle);
                     
-                    if (isSameAreaType) {
-                        // Si es de estos tipos, el área total y cubierta deben ser iguales y cumplir con ambos rangos
+                    // Si hay tipos seleccionados y TODOS los seleccionados son de isSameAreaType
+                    const onlySameAreaTypesSelected = tipos.length > 0 && tipos.every(t => ['Desarrollo', 'Oficina', 'PH', 'Departamento'].includes(t));
+                    
+                    if (onlySameAreaTypesSelected) {
+                        // Forzar que total y cubierta sean iguales y cumplan ambos rangos
                         if (item.total_area_m2 < areaMin || item.total_area_m2 > areaMax) return false;
                         if (item.total_area_m2 < areaCubiertaMin || item.total_area_m2 > areaCubiertaMax) return false;
                     } else {
-                        // Si es Casa o Local, se evalúan por separado (asumiendo que tienes un campo covered_area_m2, si no, usamos total_area_m2 como fallback)
+                        // Comportamiento normal: evaluar por separado
                         const coveredArea = item.covered_area_m2 || item.total_area_m2;
                         if (item.total_area_m2 < areaMin || item.total_area_m2 > areaMax) return false;
                         if (coveredArea < areaCubiertaMin || coveredArea > areaCubiertaMax) return false;
@@ -597,9 +600,9 @@
                     {/* Contenido Principal */}
                     <div className="flex-1 flex flex-col p-6 overflow-hidden">
                         {/* Header Superior */}
-                        <div className="flex justify-between items-start mb-2">
+                        <div className="flex justify-between items-start mb-0">
                             <div className="flex-1 text-center">
-                                <h2 className="text-3xl font-bold text-teal-800 mb-4">Análisis de valor de mercado según superficie y número de ambientes</h2>
+                                <h2 className="text-2xl font-bold text-teal-800 mb-2 truncate">Análisis de valor de mercado según superficie y número de ambientes</h2>
                                 <div className="flex items-center justify-center gap-4 text-sm font-medium text-gray-600">
                                     <span>Rooms</span>
                                     {Object.keys(COLORS).map(r => (
@@ -609,7 +612,7 @@
                                         </div>
                                     ))}
                                 </div>
-                                <div className="flex items-center justify-center gap-6 text-sm font-medium text-gray-600 mt-2">
+                                <div className="flex items-center justify-center gap-6 text-sm font-medium text-gray-600 mt-1">
                                     <div className="flex items-center gap-1">
                                         <div className="w-3 h-3 rounded-full bg-red-500"></div>
                                         <span>Sobrevalorado (+1 SD)</span>
@@ -624,41 +627,54 @@
                                     </div>
                                 </div>
                             </div>
-                            <div className="w-48 pt-2">
-                                <h3 className="font-bold text-teal-800 mb-1">Barrio</h3>
-                                <div className="h-48 overflow-y-auto border border-gray-200 rounded p-1 text-sm table-container">
-                                    {opciones.barrios.map(b => (
-                                        <label key={b} className="flex items-center gap-2 cursor-pointer text-gray-700 hover:bg-gray-50 p-1">
-                                            <input type="checkbox" className="w-4 h-4 accent-teal-700"
-                                                checked={barrios.includes(b)}
-                                                onChange={() => toggleArrayFilter(setBarrios, barrios, b)}
-                                            />
-                                            <span className="truncate" title={b}>{b}</span>
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
                         </div>
 
-                        {/* Gráfico y KPIs */}
-                        <div className="flex-1 flex relative min-h-0 mb-6">
+                        {/* Gráfico, KPIs y Links */}
+                        <div className="flex-1 flex relative min-h-0 mb-6 mt-2">
                             <div className="flex-1 h-full">
                                 <ScatterPlot data={filteredData} />
                             </div>
-                            <div className="w-48 flex flex-col gap-6 pl-6 justify-start pt-12">
-                                <div className="bg-gray-200 p-6 text-center">
-                                    <div className="text-4xl font-light text-gray-800 mb-1">{formatNumber(avgValorM2)}</div>
-                                    <div className="text-sm text-gray-500 font-medium">Valor M2</div>
+                            <div className="w-64 flex flex-col gap-4 pl-4 justify-start">
+                                {/* KPIs */}
+                                <div className="flex gap-4">
+                                    <div className="bg-gray-200 p-4 text-center flex-1 rounded">
+                                        <div className="text-2xl font-light text-gray-800 mb-1">{formatNumber(avgValorM2)}</div>
+                                        <div className="text-xs text-gray-500 font-medium">Valor M2</div>
+                                    </div>
+                                    <div className="bg-gray-200 p-4 text-center flex-1 rounded">
+                                        <div className="text-2xl font-light text-gray-800 mb-1">{formatNumber(filteredData.length)}</div>
+                                        <div className="text-xs text-gray-500 font-medium">Propiedades</div>
+                                    </div>
                                 </div>
-                                <div className="bg-gray-200 p-6 text-center">
-                                    <div className="text-4xl font-light text-gray-800 mb-1">{formatNumber(filteredData.length)}</div>
-                                    <div className="text-sm text-gray-500 font-medium">Propiedades</div>
+                                
+                                {/* Links */}
+                                <div className="flex flex-col flex-1 min-h-0 border border-gray-200 rounded">
+                                    <div className="flex justify-between font-bold text-teal-800 border-b border-gray-200 p-2 text-sm bg-gray-50 shrink-0">
+                                        <span className="cursor-pointer hover:text-teal-600" onClick={() => requestLinkSort('url')}>
+                                            Link
+                                        </span>
+                                        <span className="cursor-pointer hover:text-teal-600" onClick={() => requestLinkSort('views')}>
+                                            Views
+                                        </span>
+                                    </div>
+                                    <div className="flex-1 overflow-y-auto table-container text-xs">
+                                        {sortedLinks.slice(0, 100).map((item, idx) => (
+                                            <div key={idx} className={`flex justify-between items-center p-2 border-b border-gray-100 hover:bg-teal-50 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                                                <a href={item.url} target="_blank" rel="noreferrer" className="truncate text-gray-600 hover:text-teal-700 transition-colors w-3/4" title={item.url}>
+                                                    {item.url || 'Sin enlace'}
+                                                </a>
+                                                <span className="w-1/4 text-right text-gray-700 font-medium">
+                                                    {item.views || 0}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         {/* Tablas Inferiores */}
-                        <div className="h-72 grid grid-cols-4 gap-6 min-h-0">
+                        <div className="h-72 grid grid-cols-3 gap-6 min-h-0">
                             <Table 
                                 title="Real Estate" 
                                 data={realEstateData} 
@@ -670,6 +686,7 @@
                                 data={locationData} 
                                 onRowClick={(name) => toggleArrayFilter(setBarrios, barrios, name)}
                                 activeFilters={barrios}
+                                isLocation={true}
                             />
                             <Table 
                                 title="Ambientes" 
@@ -677,28 +694,6 @@
                                 onRowClick={(name) => toggleArrayFilter(setAmbientes, ambientes, name)}
                                 activeFilters={ambientes}
                             />
-                            <div className="flex flex-col h-full min-h-0">
-                                <div className="flex justify-between font-bold text-teal-800 border-b-[3px] border-gray-300 pb-2 mb-2 text-base shrink-0">
-                                    <span className="cursor-pointer hover:text-teal-600" onClick={() => requestLinkSort('url')}>
-                                        Link
-                                    </span>
-                                    <span className="cursor-pointer hover:text-teal-600" onClick={() => requestLinkSort('views')}>
-                                        Views
-                                    </span>
-                                </div>
-                                <div className="flex-1 overflow-y-auto table-container text-xs pr-2">
-                                    {sortedLinks.slice(0, 100).map((item, idx) => (
-                                        <div key={idx} className={`flex justify-between items-center p-1.5 border-b border-gray-200 hover:bg-teal-50 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                                            <a href={item.url} target="_blank" rel="noreferrer" className="truncate text-gray-600 hover:text-teal-700 transition-colors w-3/4" title={item.url}>
-                                                {item.url || 'Sin enlace'}
-                                            </a>
-                                            <span className="w-1/4 text-right text-gray-700 font-medium">
-                                                {item.views || 0}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -706,7 +701,7 @@
         };
 
         // Componente de Tabla Reutilizable con Ordenamiento
-        const Table = ({ title, data, onRowClick, activeFilters = [] }) => {
+        const Table = ({ title, data, onRowClick, activeFilters = [], isLocation = false }) => {
             const [sortConfig, setSortConfig] = useState({ key: 'quantity', direction: 'desc' });
 
             const sortedData = useMemo(() => {
@@ -771,8 +766,8 @@
                                     onClick={() => onRowClick && onRowClick(row.name)}
                                     className={`flex justify-between p-2 cursor-pointer transition-colors ${isActive ? 'bg-teal-100 border-l-4 border-teal-600' : (idx % 2 === 0 ? 'bg-white' : 'bg-gray-100')} hover:bg-teal-50`}
                                 >
-                                    <span className="truncate w-1/2 text-gray-800 font-medium" title={row.name}>{row.name}</span>
-                                    <div className="flex gap-6 w-1/2 justify-end text-gray-700">
+                                    <span className={`truncate ${isLocation ? 'w-2/3' : 'w-1/2'} text-gray-800 font-medium`} title={row.name}>{row.name}</span>
+                                    <div className={`flex gap-6 ${isLocation ? 'w-1/3' : 'w-1/2'} justify-end text-gray-700`}>
                                         <span className="w-16 text-right">{formatNumber(row.avgM2)}</span>
                                         <span className="w-16 text-right">{formatNumber(row.quantity)}</span>
                                     </div>
@@ -821,9 +816,8 @@
                     let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
                     
                     validData.forEach(d => {
-                        const x = d.total_area_m2;
-                        const areaForPrice = d.covered_area_m2 || d.total_area_m2 || 1;
-                        const y = d.price_value / areaForPrice;
+                        const x = d.covered_area_m2 || d.total_area_m2 || 1;
+                        const y = d.price_value / x;
                         sumX += x;
                         sumY += y;
                         sumXY += x * y;
@@ -835,17 +829,16 @@
                     
                     let sumSqRes = 0;
                     validData.forEach(d => {
-                        const x = d.total_area_m2;
-                        const areaForPrice = d.covered_area_m2 || d.total_area_m2 || 1;
-                        const y = d.price_value / areaForPrice;
+                        const x = d.covered_area_m2 || d.total_area_m2 || 1;
+                        const y = d.price_value / x;
                         const predY = m * x + b;
                         const res = y - predY;
                         sumSqRes += res * res;
                     });
                     
                     sd = Math.sqrt(sumSqRes / N);
-                    minX = Math.min(...validData.map(d => d.total_area_m2));
-                    maxX = Math.max(...validData.map(d => d.total_area_m2));
+                    minX = Math.min(...validData.map(d => d.covered_area_m2 || d.total_area_m2 || 1));
+                    maxX = Math.max(...validData.map(d => d.covered_area_m2 || d.total_area_m2 || 1));
                     
                     // Agregar líneas de regresión y márgenes
                     traces.push({
@@ -884,15 +877,14 @@
                     
                     if (!acc[r]) acc[r] = { x: [], y: [], text: [], customdata: [], colors: [] };
                     
-                    const x = item.total_area_m2;
-                    const areaForPrice = item.covered_area_m2 || item.total_area_m2 || 1;
-                    const y = areaForPrice > 0 ? item.price_value / areaForPrice : 0;
+                    const x = item.covered_area_m2 || item.total_area_m2 || 1;
+                    const y = item.price_value / x;
                     
                     acc[r].x.push(x);
                     acc[r].y.push(y);
                     
                     // Texto al pasar el mouse
-                    acc[r].text.push(`Barrio: ${item.Barrio || 'N/A'}<br>Click para ver propiedad`);
+                    acc[r].text.push(`Área: ${x} m² - Precio: US$ ${formatNumber(item.price_value)}<br>Click para ver propiedad`);
                     acc[r].customdata.push(item.url); // Guardar URL para el click
                     
                     // Determinar color según desviación estándar
@@ -922,9 +914,9 @@
                 }
 
                 const layout = {
-                    margin: { t: 20, l: 60, r: 20, b: 40 },
+                    margin: { t: 0, l: 60, r: 20, b: 40 },
                     xaxis: { 
-                        title: 'Area M2 (Log)', 
+                        title: 'Area M2 Cubierta (Log)', 
                         type: 'log',
                         showgrid: true, 
                         gridcolor: '#f3f4f6', 
