@@ -323,8 +323,6 @@
 
             // Estados de los filtros
             const [tipos, setTipos] = useState([]);
-            const [areaMin, setAreaMin] = useState(20);
-            const [areaMax, setAreaMax] = useState(240);
             const [areaCubiertaMin, setAreaCubiertaMin] = useState(20);
             const [areaCubiertaMax, setAreaCubiertaMax] = useState(240);
             const [valorMin, setValorMin] = useState(50000);
@@ -426,19 +424,17 @@
                     const onlySameAreaTypesSelected = tipos.length > 0 && tipos.every(t => ['Desarrollo', 'Oficina', 'PH', 'Departamento'].includes(t));
                     
                     if (onlySameAreaTypesSelected) {
-                        // Forzar que total y cubierta sean iguales y cumplan ambos rangos
-                        if (item.total_area_m2 < areaMin || item.total_area_m2 > areaMax) return false;
+                        // Forzar que total y cubierta sean iguales y cumplan el rango de cubierta
                         if (item.total_area_m2 < areaCubiertaMin || item.total_area_m2 > areaCubiertaMax) return false;
                     } else {
                         // Comportamiento normal: evaluar por separado
                         const coveredArea = item.covered_area_m2 || item.total_area_m2;
-                        if (item.total_area_m2 < areaMin || item.total_area_m2 > areaMax) return false;
                         if (coveredArea < areaCubiertaMin || coveredArea > areaCubiertaMax) return false;
                     }
 
                     return true;
                 });
-            }, [data, tipos, ambientes, inmobiliaria, barrios, areaMin, areaMax, areaCubiertaMin, areaCubiertaMax, valorMin, valorMax]);
+            }, [data, tipos, ambientes, inmobiliaria, barrios, areaCubiertaMin, areaCubiertaMax, valorMin, valorMax]);
 
             // KPIs
             const avgValorM2 = useMemo(() => {
@@ -547,18 +543,10 @@
 
                         {/* Filtro: Area M2 */}
                         <div>
-                            <h3 className="font-bold text-teal-800 text-lg mb-2">Area M2</h3>
-                            <div className="flex gap-2">
-                                <div className="flex flex-col gap-1 w-1/2">
-                                    <span className="text-xs text-gray-500 font-medium">Total</span>
-                                    <input type="number" value={areaMin} onChange={e => setAreaMin(Number(e.target.value))} className="border border-gray-300 p-1 text-sm bg-white w-full" placeholder="Min" />
-                                    <input type="number" value={areaMax} onChange={e => setAreaMax(Number(e.target.value))} className="border border-gray-300 p-1 text-sm bg-white w-full" placeholder="Max" />
-                                </div>
-                                <div className="flex flex-col gap-1 w-1/2">
-                                    <span className="text-xs text-gray-500 font-medium">Cubierta</span>
-                                    <input type="number" value={areaCubiertaMin} onChange={e => setAreaCubiertaMin(Number(e.target.value))} className="border border-gray-300 p-1 text-sm bg-white w-full" placeholder="Min" />
-                                    <input type="number" value={areaCubiertaMax} onChange={e => setAreaCubiertaMax(Number(e.target.value))} className="border border-gray-300 p-1 text-sm bg-white w-full" placeholder="Max" />
-                                </div>
+                            <h3 className="font-bold text-teal-800 text-lg mb-2">Area M2 Cubierta</h3>
+                            <div className="flex flex-col gap-2 w-24 ml-1">
+                                <input type="number" value={areaCubiertaMin} onChange={e => setAreaCubiertaMin(Number(e.target.value))} className="border border-gray-300 p-1 text-sm bg-white" placeholder="Min" />
+                                <input type="number" value={areaCubiertaMax} onChange={e => setAreaCubiertaMax(Number(e.target.value))} className="border border-gray-300 p-1 text-sm bg-white" placeholder="Max" />
                             </div>
                         </div>
 
@@ -817,11 +805,12 @@
                     
                     validData.forEach(d => {
                         const x = d.covered_area_m2 || d.total_area_m2 || 1;
+                        const logX = Math.log10(x);
                         const y = d.price_value / x;
-                        sumX += x;
+                        sumX += logX;
                         sumY += y;
-                        sumXY += x * y;
-                        sumX2 += x * x;
+                        sumXY += logX * y;
+                        sumX2 += logX * logX;
                     });
                     
                     m = (N * sumXY - sumX * sumY) / (N * sumX2 - sumX * sumX);
@@ -830,8 +819,9 @@
                     let sumSqRes = 0;
                     validData.forEach(d => {
                         const x = d.covered_area_m2 || d.total_area_m2 || 1;
+                        const logX = Math.log10(x);
                         const y = d.price_value / x;
-                        const predY = m * x + b;
+                        const predY = m * logX + b;
                         const res = y - predY;
                         sumSqRes += res * res;
                     });
@@ -843,7 +833,7 @@
                     // Agregar líneas de regresión y márgenes
                     traces.push({
                         x: [minX, maxX],
-                        y: [m * minX + b, m * maxX + b],
+                        y: [m * Math.log10(minX) + b, m * Math.log10(maxX) + b],
                         mode: 'lines',
                         type: 'scatter',
                         name: 'Regresión',
@@ -852,7 +842,7 @@
                     });
                     traces.push({
                         x: [minX, maxX],
-                        y: [m * minX + b + sd, m * maxX + b + sd],
+                        y: [m * Math.log10(minX) + b + sd, m * Math.log10(maxX) + b + sd],
                         mode: 'lines',
                         type: 'scatter',
                         name: '+1 SD',
@@ -861,7 +851,7 @@
                     });
                     traces.push({
                         x: [minX, maxX],
-                        y: [m * minX + b - sd, m * maxX + b - sd],
+                        y: [m * Math.log10(minX) + b - sd, m * Math.log10(maxX) + b - sd],
                         mode: 'lines',
                         type: 'scatter',
                         name: '-1 SD',
@@ -890,7 +880,7 @@
                     // Determinar color según desviación estándar
                     let ptColor = COLORS[r] || COLORS[6] || '#9ca3af';
                     if (validData.length > 1) {
-                        const predY = m * x + b;
+                        const predY = m * Math.log10(x) + b;
                         if (y > predY + sd) ptColor = '#ef4444'; // Rojo (Sobrevalorado)
                         else if (y < predY - sd) ptColor = '#22c55e'; // Verde (Oportunidad)
                     }
