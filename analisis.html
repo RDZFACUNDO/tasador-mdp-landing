@@ -500,7 +500,14 @@ const App = () => {
 
         <div className="grid grid-cols-2 gap-4 p-4 border-t border-gray-200">
           <div>
-            <h4 className="font-bold text-sm mb-2 teal">Por Inmobiliaria</h4>
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="font-bold text-sm teal">Por Inmobiliaria</h4>
+              {inmobiliaria!=='Todas' && (
+                <button onClick={()=>setInmobiliaria('Todas')} className="text-[11px] text-gray-400 hover:text-red-500">
+                  Limpiar filtro ✕
+                </button>
+              )}
+            </div>
             <div className="table-container overflow-y-auto border rounded-lg" style={{maxHeight:'260px'}}>
               <table className="w-full text-xs">
                 <thead className="bg-gray-50 sticky top-0"><tr className="text-gray-500">
@@ -509,13 +516,24 @@ const App = () => {
                   <th className="text-right p-2 cursor-pointer select-none" onClick={()=>onSortInmob('qty')}>Cant.<Arrow active={sortInmob.key==='qty'} dir={sortInmob.dir}/></th>
                 </tr></thead>
                 <tbody>{porInmobiliaria.map(r=>(
-                  <tr key={r.name} className="border-t hover:bg-gray-50"><td className="p-2">{r.name}</td><td className="p-2 text-right">{fmt(r.avgM2)}</td><td className="p-2 text-right">{r.qty}</td></tr>
+                  <tr key={r.name}
+                    onClick={()=>setInmobiliaria(inmobiliaria===r.name ? 'Todas' : r.name)}
+                    className={`border-t cursor-pointer hover:bg-gray-50 ${inmobiliaria===r.name ? 'bg-teal/10' : ''}`}
+                    style={inmobiliaria===r.name ? {backgroundColor:'#5B8B8A22'} : {}}>
+                    <td className="p-2">{r.name}</td><td className="p-2 text-right">{fmt(r.avgM2)}</td><td className="p-2 text-right">{r.qty}</td></tr>
                 ))}</tbody>
               </table>
             </div>
           </div>
           <div>
-            <h4 className="font-bold text-sm mb-2 teal">Por Barrio</h4>
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="font-bold text-sm teal">Por Barrio</h4>
+              {barrios.length>0 && (
+                <button onClick={()=>setBarrios([])} className="text-[11px] text-gray-400 hover:text-red-500">
+                  Limpiar filtro ✕
+                </button>
+              )}
+            </div>
             <div className="table-container overflow-y-auto border rounded-lg" style={{maxHeight:'260px'}}>
               <table className="w-full text-xs">
                 <thead className="bg-gray-50 sticky top-0"><tr className="text-gray-500">
@@ -524,7 +542,11 @@ const App = () => {
                   <th className="text-right p-2 cursor-pointer select-none" onClick={()=>onSortBarrio('qty')}>Cant.<Arrow active={sortBarrio.key==='qty'} dir={sortBarrio.dir}/></th>
                 </tr></thead>
                 <tbody>{porBarrio.map(r=>(
-                  <tr key={r.name} className="border-t hover:bg-gray-50"><td className="p-2">{r.name}</td><td className="p-2 text-right">{fmt(r.avgM2)}</td><td className="p-2 text-right">{r.qty}</td></tr>
+                  <tr key={r.name}
+                    onClick={()=>toggle(setBarrios, barrios, r.name)}
+                    className="border-t cursor-pointer hover:bg-gray-50"
+                    style={barrios.includes(r.name) ? {backgroundColor:'#5B8B8A22'} : {}}>
+                    <td className="p-2">{r.name}</td><td className="p-2 text-right">{fmt(r.avgM2)}</td><td className="p-2 text-right">{r.qty}</td></tr>
                 ))}</tbody>
               </table>
             </div>
