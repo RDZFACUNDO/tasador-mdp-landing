@@ -1,1023 +1,377 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reporte Inmobiliario MDP - Análisis Estadístico</title>
-    
-    <meta name="description" content="Valuador de propiedades online en Mar del Plata. Conocé el valor de venta de tu inmueble con inteligencia de datos, mapas de calor y reportes de mercado actualizados.">
-    
-    <link rel="icon" type="image/png" href="/images/favicon-app.png">
-    <link rel="apple-touch-icon" href="/images/favicon-app.png">
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- React & ReactDOM -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-    <!-- Babel para compilar JSX en el navegador -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- Plotly.js -->
-    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
-    <!-- Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Roboto', sans-serif;
-            background: #f5f5f5;
-            color: #333;
-            line-height: 1.6;
-        }
-        
-        /* Header con Banner */
-        .header {
-            position: relative;
-            height: 400px;
-            background: url('./images/Banner.png') center center/cover;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            color: white;
-            overflow: hidden;
-        }
-        
-        .header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.3);
-        }
-        
-        .header-content {
-            position: relative;
-            z-index: 2;
-            max-width: 900px;
-            padding: 0 24px;
-        }
-        
-        .header h1 {
-            font-size: clamp(32px, 6vw, 56px);
-            font-weight: 700;
-            margin-bottom: 16px;
-            letter-spacing: 2px;
-            text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
-        }
-        
-        .header p {
-            font-size: clamp(16px, 3vw, 20px);
-            font-weight: 300;
-            max-width: 800px;
-            margin: 0 auto;
-            line-height: 1.7;
-            text-shadow: 1px 1px 4px rgba(0,0,0,0.3);
-        }
-        
-        /* Nav */
-        nav {
-            background: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        
-        nav ul {
-            list-style: none;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        nav li {
-            padding: 0;
-        }
-        
-        nav a {
-            display: block;
-            padding: 20px 32px;
-            color: #5B8B8A;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            border-bottom: 3px solid transparent;
-        }
-        
-        nav a:hover {
-            background: #f0f0f0;
-            border-bottom-color: #5B8B8A;
-        }
-        
-        /* Footer */
-        footer {
-            background: #2c3e50;
-            color: white;
-            padding: 40px 24px 20px;
-        }
-        
-        .footer-content {
-            max-width: 1000px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 32px;
-            margin-bottom: 24px;
-        }
-        
-        .footer-logo {
-            text-align: center;
-        }
-        
-        .footer-logo img {
-            max-width: 140px;
-            height: auto;
-            margin-bottom: 12px;
-            border-radius: 8px;
-        }
-        
-        .footer-section h4 {
-            font-size: 18px;
-            margin-bottom: 16px;
-            color: #5B8B8A;
-        }
-        
-        .footer-section p,
-        .footer-section a {
-            color: rgba(255, 255, 255, 0.8);
-            text-decoration: none;
-            display: block;
-            margin-bottom: 8px;
-            font-size: 16px;
-            transition: color 0.3s ease;
-        }
-        
-        .footer-section a:hover {
-            color: #5B8B8A;
-        }
-        
-        .footer-bottom {
-            text-align: center;
-            padding-top: 24px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 14px;
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .header {
-                height: 300px;
-            }
-            
-            nav a {
-                padding: 16px 20px;
-            }
-        }
-
-        /* Custom scrollbar para las tablas del dashboard */
-        .table-container::-webkit-scrollbar {
-            width: 6px;
-        }
-        .table-container::-webkit-scrollbar-track {
-            background: #f1f1f1; 
-        }
-        .table-container::-webkit-scrollbar-thumb {
-            background: #888; 
-            border-radius: 4px;
-        }
-        .table-container::-webkit-scrollbar-thumb:hover {
-            background: #555; 
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reporte Inmobiliario MDP - Análisis Estadístico (Mockup)</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Roboto', sans-serif; background:#f5f5f5; color:#333; }
+.teal { color:#5B8B8A; }
+.bg-teal { background:#5B8B8A; }
+.chip { border:1px solid #d1d5db; border-radius:999px; padding:4px 12px; font-size:12px; cursor:pointer; user-select:none; transition:.15s; }
+.chip.active { background:#5B8B8A; color:white; border-color:#5B8B8A; }
+.checkbox-row { display:flex; align-items:center; gap:8px; font-size:13px; padding:3px 0; cursor:pointer; }
+.tab-btn { padding:10px 18px; font-size:14px; font-weight:500; border-bottom:3px solid transparent; cursor:pointer; color:#666; }
+.tab-btn.active { color:#5B8B8A; border-bottom-color:#5B8B8A; }
+.table-container::-webkit-scrollbar { width:6px; }
+.table-container::-webkit-scrollbar-thumb { background:#c9c9c9; border-radius:4px; }
+input[type=range]{ accent-color:#5B8B8A; }
+</style>
 </head>
 <body>
-    <!-- Header con Banner -->
-    <header class="header">
-        <div class="header-content">
-            <h1>REPORTE INMOBILIARIO MDP</h1>
-            <p>
-                Inteligencia de datos aplicada al sector inmobiliario de Mar del Plata. 
-                Analiza el mercado en tiempo real mediante tasaciones inmediatas, mapas de valor 
-                por barrio, monitoreo y reporting constante de la oferta local.
-            </p>
+<div class="max-w-[1500px] mx-auto my-6 px-4">
+  <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
+    <div id="root"></div>
+  </div>
+</div>
+
+<script type="text/babel">
+const { useState, useEffect, useMemo, useRef } = React;
+
+const BARRIOS_MDP = [
+  {n:'Centro', lat:-38.0055, lng:-57.5426}, {n:'Playa Grande', lat:-38.0279, lng:-57.5352},
+  {n:'Playa Chica', lat:-38.0231, lng:-57.5307}, {n:'Playa Varese', lat:-38.0198, lng:-57.5288},
+  {n:'Güemes', lat:-38.0177, lng:-57.5464}, {n:'La Perla', lat:-37.9838, lng:-57.5486},
+  {n:'Chauvín', lat:-38.0055, lng:-57.5426}, {n:'Stella Maris', lat:-37.9962, lng:-57.5601},
+  {n:'Torreón', lat:-38.0334, lng:-57.5406}, {n:'Cabo Corrientes', lat:-38.0323, lng:-57.5388},
+];
+const TIPOS = ['Departamento','Casa','PH','Local Comercial','Oficina comercial'];
+const ANTIGUEDADES = ['A estrenar','En construcción','0-10 años','10-30 años','30+ años'];
+const DISPOSICIONES = ['Frente','Contrafrente','Interno','Lateral'];
+const INMOBILIARIAS = ['Yacoub','Bessone Inmobiliaria','Tornato Propiedades','Re/Max Feliz','Century 21','Girard Propiedades'];
+const COLORS_AMB = {1:'#3b82f6',2:'#1d4ed8',3:'#f97316',4:'#7e22ce',5:'#ec4899',6:'#8b5cf6'};
+
+function generarMock(n=724){
+  const out=[];
+  for(let i=0;i<n;i++){
+    const tipo = TIPOS[Math.floor(Math.random()*TIPOS.length)];
+    const barrio = BARRIOS_MDP[Math.floor(Math.random()*BARRIOS_MDP.length)];
+    const area = Math.floor(Math.random()*220)+25;
+    const rooms = Math.min(6, Math.floor(Math.random()*6)+1);
+    const baseM2 = 3200 - (area*5) + (Math.random()*700) + (tipo==='Local Comercial'||tipo==='Oficina comercial'?400:0);
+    const price = Math.round(baseM2*area);
+    const diasPub = Math.floor(Math.random()*280)+1;
+    out.push({
+      posting_id:100000+i,
+      url:`https://www.zonaprop.com.ar/propiedades/mock-${i}.html`,
+      real_estate_type: tipo,
+      price_value: price,
+      covered_area_m2: area,
+      rooms,
+      bathrooms: Math.max(1, Math.round(rooms*0.7)),
+      parking: Math.random()<0.55 ? 0 : Math.floor(Math.random()*3)+1,
+      antiquity: ANTIGUEDADES[Math.floor(Math.random()*ANTIGUEDADES.length)],
+      disposition: Math.random()<0.6 ? DISPOSICIONES[Math.floor(Math.random()*DISPOSICIONES.length)] : null,
+      barrio: barrio.n,
+      latitud: barrio.lat + (Math.random()-0.5)*0.01,
+      longitud: barrio.lng + (Math.random()-0.5)*0.01,
+      publisher_name: INMOBILIARIAS[Math.floor(Math.random()*INMOBILIARIAS.length)],
+      views: Math.floor(Math.random()*11),
+      dias_publicado: diasPub,
+    });
+  }
+  return out;
+}
+
+const fmt = n => new Intl.NumberFormat('en-US').format(Math.round(n));
+
+const App = () => {
+  const data = useMemo(()=>generarMock(),[]);
+
+  const [tipos, setTipos] = useState([]);
+  const [areaMin, setAreaMin] = useState(20);
+  const [areaMax, setAreaMax] = useState(250);
+  const [valorMin, setValorMin] = useState(20000);
+  const [valorMax, setValorMax] = useState(400000);
+  const [antiguedad, setAntiguedad] = useState('Todas');
+  const [disposiciones, setDisposiciones] = useState([]);
+  const [cocheras, setCocheras] = useState('Todas');
+  const [inmobiliaria, setInmobiliaria] = useState('Todas');
+  const [ambientes, setAmbientes] = useState([]);
+  const [barrios, setBarrios] = useState([]);
+
+  const toggle = (setter, arr, val) => setter(arr.includes(val) ? arr.filter(v=>v!==val) : [...arr, val]);
+
+  const filtered = useMemo(()=>data.filter(d=>{
+    if(tipos.length && !tipos.includes(d.real_estate_type)) return false;
+    if(d.covered_area_m2 < areaMin || d.covered_area_m2 > areaMax) return false;
+    if(d.price_value < valorMin || d.price_value > valorMax) return false;
+    if(antiguedad!=='Todas' && d.antiquity!==antiguedad) return false;
+    if(disposiciones.length && !disposiciones.includes(d.disposition)) return false;
+    if(cocheras!=='Todas'){
+      if(cocheras==='3+' ? d.parking<3 : d.parking!==Number(cocheras)) return false;
+    }
+    if(inmobiliaria!=='Todas' && d.publisher_name!==inmobiliaria) return false;
+    if(ambientes.length){
+      const r = d.rooms>=6?'6+':String(d.rooms);
+      if(!ambientes.includes(r)) return false;
+    }
+    if(barrios.length && !barrios.includes(d.barrio)) return false;
+    return true;
+  }),[data,tipos,areaMin,areaMax,valorMin,valorMax,antiguedad,disposiciones,cocheras,inmobiliaria,ambientes,barrios]);
+
+  const avgM2 = useMemo(()=>{
+    if(!filtered.length) return 0;
+    return filtered.reduce((a,d)=>a+d.price_value/d.covered_area_m2,0)/filtered.length;
+  },[filtered]);
+
+  const aggregate = (key) => {
+    const groups = {};
+    filtered.forEach(d=>{
+      const k = d[key]||'No identificado';
+      if(!groups[k]) groups[k]={count:0,sum:0};
+      groups[k].count++; groups[k].sum += d.price_value/d.covered_area_m2;
+    });
+    return Object.entries(groups).map(([k,v])=>({name:k,qty:v.count,avgM2:Math.round(v.sum/v.count)}));
+  };
+  const porInmobiliariaBase = useMemo(()=>aggregate('publisher_name'),[filtered]);
+  const porBarrioBase = useMemo(()=>aggregate('barrio'),[filtered]);
+
+  // Sort genérico reutilizable: cada tabla guarda su propio {key, dir}
+  const useSort = (rows, defaultKey) => {
+    const [sort, setSort] = useState({key: defaultKey, dir: 'desc'});
+    const sorted = useMemo(()=>{
+      const arr = [...rows];
+      arr.sort((a,b)=>{
+        const va = a[sort.key], vb = b[sort.key];
+        const cmp = typeof va === 'string' ? va.localeCompare(vb) : va - vb;
+        return sort.dir === 'asc' ? cmp : -cmp;
+      });
+      return arr;
+    },[rows, sort]);
+    const onSort = (key) => setSort(s => ({key, dir: s.key===key && s.dir==='desc' ? 'asc' : 'desc'}));
+    return [sorted, sort, onSort];
+  };
+
+  const [porInmobiliaria, sortInmob, onSortInmob] = useSort(porInmobiliariaBase, 'qty');
+  const [porBarrio, sortBarrio, onSortBarrio] = useSort(porBarrioBase, 'qty');
+  const [topVistas, sortVistas, onSortVistas] = useSort(filtered, 'views');
+
+  const Arrow = ({active, dir}) => <span style={{opacity:active?1:0.25, fontSize:'9px', marginLeft:'2px'}}>{dir==='asc'?'▲':'▼'}</span>;
+
+  const plotRef = useRef(null);
+  useEffect(()=>{
+    if(!plotRef.current) return;
+    const valid = filtered.filter(d=>d.covered_area_m2>0);
+    if(!valid.length){ Plotly.purge(plotRef.current); return; }
+
+    // Regresión cuadrática en log10(área): y = b0 + b1*u + b2*u^2, u=log10(x)
+    // (en vez de una recta con 2 extremos) para que la curva y las bandas de
+    // SD sigan la curvatura real de la nube de puntos, no una aproximación lineal.
+    const N = valid.length;
+    const us = valid.map(d=>Math.log10(d.covered_area_m2));
+    const ys = valid.map(d=>d.price_value/d.covered_area_m2);
+
+    let S0=N,S1=0,S2=0,S3=0,S4=0,T0=0,T1=0,T2=0;
+    for(let i=0;i<N;i++){
+      const u=us[i], y=ys[i], u2=u*u;
+      S1+=u; S2+=u2; S3+=u2*u; S4+=u2*u2;
+      T0+=y; T1+=y*u; T2+=y*u2;
+    }
+    // Resolver sistema 3x3 (ecuaciones normales) por eliminación gaussiana
+    const A=[[S0,S1,S2,T0],[S1,S2,S3,T1],[S2,S3,S4,T2]];
+    for(let i=0;i<3;i++){
+      let piv=A[i][i];
+      for(let j=i;j<4;j++) A[i][j]/=piv;
+      for(let k=0;k<3;k++){ if(k===i) continue; const f=A[k][i]; for(let j=i;j<4;j++) A[k][j]-=f*A[i][j]; }
+    }
+    const [b0,b1,b2]=[A[0][3],A[1][3],A[2][3]];
+    const predict = u => b0 + b1*u + b2*u*u;
+
+    let sumSq=0;
+    for(let i=0;i<N;i++){ const res=ys[i]-predict(us[i]); sumSq+=res*res; }
+    const sd = Math.sqrt(sumSq/N);
+
+    const uMin=Math.min(...us), uMax=Math.max(...us);
+    const STEPS=40;
+    const curveX=[], curveY=[], curveHi=[], curveLo=[];
+    for(let i=0;i<=STEPS;i++){
+      const u = uMin + (uMax-uMin)*i/STEPS;
+      const x = Math.pow(10,u);
+      const p = predict(u);
+      curveX.push(x); curveY.push(p); curveHi.push(p+sd); curveLo.push(p-sd);
+    }
+
+    const traces=[];
+    traces.push({x:curveX, y:curveY, mode:'lines', name:'Regresión', line:{color:'#4b5563',width:2,shape:'spline'}, hoverinfo:'name'});
+    traces.push({x:curveX, y:curveHi, mode:'lines', name:'+1 SD', line:{color:'#ef4444',width:1,dash:'dash',shape:'spline'}, hoverinfo:'none'});
+    traces.push({x:curveX, y:curveLo, mode:'lines', name:'-1 SD', line:{color:'#22c55e',width:1,dash:'dash',shape:'spline'}, hoverinfo:'none'});
+
+    const grouped={};
+    valid.forEach(d=>{
+      let r=d.rooms>=6?6:d.rooms;
+      if(!grouped[r]) grouped[r]={x:[],y:[],text:[],custom:[],colors:[]};
+      const y=d.price_value/d.covered_area_m2;
+      const pred=predict(Math.log10(d.covered_area_m2));
+      let color = COLORS_AMB[r]||'#9ca3af';
+      if(y>pred+sd) color='#ef4444'; else if(y<pred-sd) color='#22c55e';
+      grouped[r].x.push(d.covered_area_m2); grouped[r].y.push(y);
+      grouped[r].text.push(`${d.real_estate_type} - ${d.barrio}<br>Área: ${d.covered_area_m2} m² - US$ ${fmt(d.price_value)}`);
+      grouped[r].custom.push(d.url); grouped[r].colors.push(color);
+    });
+    Object.entries(grouped).forEach(([r,g])=>{
+      traces.push({x:g.x,y:g.y,text:g.text,customdata:g.custom,mode:'markers',type:'scatter',name:String(r),
+        marker:{color:g.colors,size:6,opacity:0.75}, hoverinfo:'text'});
+    });
+
+    Plotly.newPlot(plotRef.current, traces, {
+      margin:{t:10,l:60,r:20,b:40},
+      xaxis:{title:'Área m² Cubierta (Log)', type:'log', gridcolor:'#f3f4f6'},
+      yaxis:{title:'Valor por m²', gridcolor:'#f3f4f6'},
+      showlegend:false, plot_bgcolor:'white', paper_bgcolor:'white', hovermode:'closest'
+    }, {responsive:true, displayModeBar:false});
+
+  },[filtered]);
+
+  return (
+    <div className="flex" style={{minHeight:'900px'}}>
+      <aside className="w-[260px] border-r border-gray-200 p-4 overflow-y-auto" style={{maxHeight:'1000px'}}>
+        <h3 className="font-bold text-sm mb-2 teal">Tipo de Propiedad</h3>
+        {TIPOS.map(t=>(
+          <label key={t} className="checkbox-row"><input type="checkbox" checked={tipos.includes(t)} onChange={()=>toggle(setTipos,tipos,t)}/>{t}</label>
+        ))}
+
+        <h3 className="font-bold text-sm mt-4 mb-2 teal">Área m² Cubierta</h3>
+        <div className="flex gap-2">
+          <input type="number" value={areaMin} onChange={e=>setAreaMin(Number(e.target.value))} className="w-full border rounded px-2 py-1 text-sm"/>
+          <input type="number" value={areaMax} onChange={e=>setAreaMax(Number(e.target.value))} className="w-full border rounded px-2 py-1 text-sm"/>
         </div>
-    </header>
-    
-    <!-- Nav -->
-    <nav>
-        <ul>
-            <li><a href="index.html">Reporte Inmobiliario</a></li>
-            <li><a href="mapa-calor.html">Mapa de calor</a></li>
-            <li><a href="analisis.html">Análisis Estadístico</a></li>
-            <li><a href="tasador.html">Tasador</a></li>
-        </ul>
-    </nav>
 
-    <!-- Contenedor del Dashboard -->
-    <div class="max-w-[1400px] mx-auto my-10 px-4">
-        <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200" style="height: 1000px;">
-            <div id="root" class="h-full w-full"></div>
-    
-    <script type="text/babel">
-        const { useState, useEffect, useMemo, useRef } = React;
-        const { createClient } = supabase;
-
-        // --- Configuración de Supabase ---
-        // IMPORTANTE: Reemplaza 'TU_ANON_KEY' con tu clave anónima real de Supabase.
-        // Puedes encontrarla en tu panel de Supabase: Project Settings -> API -> anon public
-        const supabaseUrl = 'https://pntruonwgiotzdslnjgc.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBudHJ1b253Z2lvdHpkc2xuamdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwODQ5MTksImV4cCI6MjA4NzY2MDkxOX0.ObqlbfjIeCt3Z15oqDS3l3tRSohzw-hmi5fUX5giVBg'; 
-        const supabaseClient = createClient(supabaseUrl, supabaseKey);
-
-        // Colores para la leyenda y los puntos (coinciden con la imagen)
-        const COLORS = {
-            1: '#3b82f6', // blue-500
-            2: '#1d4ed8', // blue-800
-            3: '#f97316', // orange-500
-            4: '#7e22ce', // purple-700
-            5: '#ec4899', // pink-500
-            6: '#8b5cf6', // violet-500
-            7: '#eab308', // yellow-500
-            8: '#ef4444', // red-500
-        };
-
-        const formatNumber = (num) => new Intl.NumberFormat('en-US').format(num);
-
-        // Funciones de caché con IndexedDB para almacenar datos localmente
-        const DB_NAME = 'RealEstateDashboard';
-        const STORE_NAME = 'cache';
-        const CACHE_KEY = 'propiedades_mdp';
-        const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 horas en milisegundos
-
-        const openDB = () => {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open(DB_NAME, 1);
-                request.onupgradeneeded = (e) => {
-                    const db = e.target.result;
-                    if (!db.objectStoreNames.contains(STORE_NAME)) {
-                        db.createObjectStore(STORE_NAME);
-                    }
-                };
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = () => reject(request.error);
-            });
-        };
-
-        const getCachedData = async () => {
-            try {
-                const db = await openDB();
-                return new Promise((resolve) => {
-                    const tx = db.transaction(STORE_NAME, 'readonly');
-                    const store = tx.objectStore(STORE_NAME);
-                    const request = store.get(CACHE_KEY);
-                    request.onsuccess = () => {
-                        const result = request.result;
-                        if (result && (Date.now() - result.timestamp < CACHE_TTL)) {
-                            resolve(result.data);
-                        } else {
-                            resolve(null);
-                        }
-                    };
-                    request.onerror = () => resolve(null);
-                });
-            } catch (e) {
-                console.error("Error leyendo caché:", e);
-                return null;
-            }
-        };
-
-        const setCachedData = async (data) => {
-            try {
-                const db = await openDB();
-                return new Promise((resolve, reject) => {
-                    const tx = db.transaction(STORE_NAME, 'readwrite');
-                    const store = tx.objectStore(STORE_NAME);
-                    const request = store.put({ timestamp: Date.now(), data: data }, CACHE_KEY);
-                    request.onsuccess = () => resolve();
-                    request.onerror = () => reject(request.error);
-                });
-            } catch (e) {
-                console.error("Error guardando caché:", e);
-            }
-        };
-
-        const App = () => {
-            const [data, setData] = useState([]);
-            const [loading, setLoading] = useState(true);
-
-            // Estados de los filtros
-            const [tipos, setTipos] = useState([]);
-            const [areaCubiertaMin, setAreaCubiertaMin] = useState(20);
-            const [areaCubiertaMax, setAreaCubiertaMax] = useState(240);
-            const [valorMin, setValorMin] = useState(50000);
-            const [valorMax, setValorMax] = useState(150000);
-            const [inmobiliaria, setInmobiliaria] = useState('Todas');
-            const [ambientes, setAmbientes] = useState([]);
-            const [barrios, setBarrios] = useState([]);
-
-            // Opciones únicas extraídas de los datos
-            const [opciones, setOpciones] = useState({
-                tipos: [],
-                inmobiliarias: [],
-                barrios: [],
-                ambientes: []
-            });
-
-            useEffect(() => {
-                const fetchData = async () => {
-                    try {
-                        const processData = (finalData) => {
-                            setData(finalData);
-                            const uniqueTipos = ['Casa', 'Departamento', 'Desarrollo', 'Local', 'Oficina', 'PH'];
-                            const uniqueInmobiliarias = [...new Set(finalData.map(d => d.publisher).filter(Boolean))].sort();
-                            const uniqueBarrios = [...new Set(finalData.map(d => d.Barrio).filter(Boolean))].sort();
-                            const uniqueAmbientes = ['1', '2', '3', '4', '5', '6+'];
-
-                            setOpciones({
-                                tipos: uniqueTipos,
-                                inmobiliarias: uniqueInmobiliarias,
-                                barrios: uniqueBarrios,
-                                ambientes: uniqueAmbientes
-                            });
-                            setLoading(false);
-                        };
-
-                        // 1. Intentar obtener datos de la caché local
-                        const cachedData = await getCachedData();
-                        if (cachedData) {
-                            console.log("Cargando datos desde caché local (válida por 24hs)...");
-                            processData(cachedData);
-                            return;
-                        }
-
-                        console.log("Obteniendo datos desde la API...");
-                        // 2. Si no hay caché o expiró, obtener de la API (que maneja la caché de Vercel y Supabase)
-                        let allData = [];
-                        let fetchError = null;
-
-                        try {
-                            const response = await fetch('/api/propiedades');
-                            if (!response.ok) {
-                                throw new Error(`HTTP error! status: ${response.status}`);
-                            }
-                            allData = await response.json();
-                        } catch (error) {
-                            fetchError = error;
-                        }
-                        
-                        let finalData = allData;
-
-                        // Si hay error o no hay datos, usamos mock data
-                        if (fetchError || allData.length === 0) {
-                            console.warn("No se pudo obtener datos de la API. Usando datos de prueba.", fetchError);
-                            finalData = generateMockData();
-                        } else {
-                            // 3. Guardar en caché si la consulta fue exitosa
-                            await setCachedData(allData);
-                            console.log("Datos guardados en caché local.");
-                        }
-
-                        processData(finalData);
-
-                    } catch (err) {
-                        console.error("Error:", err);
-                        setLoading(false);
-                    }
-                };
-                fetchData();
-            }, []);
-
-            // Filtrado dinámico
-            const filteredData = useMemo(() => {
-                return data.filter(item => {
-                    if (tipos.length > 0 && !tipos.includes(item.type_subtitle)) return false;
-                    
-                    if (ambientes.length > 0) {
-                        const itemRooms = item.rooms >= 6 ? '6+' : String(item.rooms);
-                        if (!ambientes.includes(itemRooms)) return false;
-                    }
-
-                    if (inmobiliaria !== 'Todas' && item.publisher !== inmobiliaria) return false;
-                    if (barrios.length > 0 && !barrios.includes(item.Barrio)) return false;
-                    if (item.price_value < valorMin || item.price_value > valorMax) return false;
-
-                    // Lógica de áreas
-                    const isSameAreaType = ['Desarrollo', 'Oficina', 'PH', 'Departamento'].includes(item.type_subtitle);
-                    
-                    // Si hay tipos seleccionados y TODOS los seleccionados son de isSameAreaType
-                    const onlySameAreaTypesSelected = tipos.length > 0 && tipos.every(t => ['Desarrollo', 'Oficina', 'PH', 'Departamento'].includes(t));
-                    
-                    if (onlySameAreaTypesSelected) {
-                        // Forzar que total y cubierta sean iguales y cumplan el rango de cubierta
-                        if (item.total_area_m2 < areaCubiertaMin || item.total_area_m2 > areaCubiertaMax) return false;
-                    } else {
-                        // Comportamiento normal: evaluar por separado
-                        const coveredArea = item.covered_area_m2 || item.total_area_m2;
-                        if (coveredArea < areaCubiertaMin || coveredArea > areaCubiertaMax) return false;
-                    }
-
-                    return true;
-                });
-            }, [data, tipos, ambientes, inmobiliaria, barrios, areaCubiertaMin, areaCubiertaMax, valorMin, valorMax]);
-
-            // KPIs
-            const avgValorM2 = useMemo(() => {
-                if (filteredData.length === 0) return 0;
-                const sum = filteredData.reduce((acc, item) => {
-                    const area = item.covered_area_m2 || item.total_area_m2 || 1;
-                    return acc + (item.price_value / area);
-                }, 0);
-                return Math.round(sum / filteredData.length);
-            }, [filteredData]);
-
-            // Agrupación para las tablas inferiores
-            const aggregateBy = (key) => {
-                const groups = {};
-                filteredData.forEach(item => {
-                    const val = item[key] || 'No Identificado';
-                    if (!groups[val]) groups[val] = { count: 0, sumM2: 0 };
-                    groups[val].count += 1;
-                    const area = item.covered_area_m2 || item.total_area_m2 || 1;
-                    groups[val].sumM2 += (item.price_value / area);
-                });
-                return Object.keys(groups).map(k => ({
-                    name: k,
-                    quantity: groups[k].count,
-                    avgM2: Math.round(groups[k].sumM2 / groups[k].count)
-                })).sort((a, b) => b.quantity - a.quantity);
-            };
-
-            const realEstateData = aggregateBy('publisher');
-            const locationData = aggregateBy('Barrio');
-            const ambientesData = aggregateBy('rooms').map(item => {
-                // Reagrupar para la tabla si es necesario, aunque ya viene agrupado por el valor real
-                let name = item.name;
-                if (name === 'No Identificado' || Number(name) >= 6) {
-                    name = '6+';
-                }
-                return {
-                    ...item,
-                    name: name
-                };
-            }).reduce((acc, curr) => {
-                // Combinar los 6+ en la tabla
-                const existing = acc.find(x => x.name === curr.name);
-                if (existing) {
-                    const totalQuantity = existing.quantity + curr.quantity;
-                    existing.avgM2 = Math.round(((existing.avgM2 * existing.quantity) + (curr.avgM2 * curr.quantity)) / totalQuantity);
-                    existing.quantity = totalQuantity;
-                } else {
-                    acc.push(curr);
-                }
-                return acc;
-            }, []).sort((a, b) => (a.name === '6+' ? 1 : b.name === '6+' ? -1 : a.name - b.name));
-
-            const toggleArrayFilter = (setter, array, value) => {
-                setter(array.includes(value) ? array.filter(v => v !== value) : [...array, value]);
-            };
-
-            const [linkSortConfig, setLinkSortConfig] = useState({ key: 'views', direction: 'desc' });
-
-            const sortedLinks = useMemo(() => {
-                let sortableLinks = [...filteredData];
-                sortableLinks.sort((a, b) => {
-                    let aVal = a[linkSortConfig.key] || 0;
-                    let bVal = b[linkSortConfig.key] || 0;
-                    
-                    if (aVal < bVal) {
-                        return linkSortConfig.direction === 'asc' ? -1 : 1;
-                    }
-                    if (aVal > bVal) {
-                        return linkSortConfig.direction === 'asc' ? 1 : -1;
-                    }
-                    return 0;
-                });
-                return sortableLinks;
-            }, [filteredData, linkSortConfig]);
-
-            const requestLinkSort = (key) => {
-                let direction = 'desc';
-                if (linkSortConfig.key === key && linkSortConfig.direction === 'desc') {
-                    direction = 'asc';
-                }
-                setLinkSortConfig({ key, direction });
-            };
-
-            if (loading) return <div className="flex items-center justify-center h-full text-2xl text-teal-800 font-bold">Cargando Dashboard...</div>;
-
-            return (
-                <div className="flex h-full w-full bg-white">
-                    {/* Panel Lateral Izquierdo */}
-                    <div className="w-64 bg-gray-50 p-5 flex flex-col gap-6 overflow-y-auto border-r border-gray-200 shrink-0">
-                        {/* Filtro: Tipo */}
-                        <div>
-                            <h3 className="font-bold text-teal-800 text-lg mb-2">Tipo</h3>
-                            <div className="flex flex-col gap-1.5 ml-1">
-                                {opciones.tipos.map(t => (
-                                    <label key={t} className="flex items-center gap-2 text-sm cursor-pointer text-gray-700">
-                                        <input type="checkbox" className="w-4 h-4 accent-teal-700"
-                                            checked={tipos.includes(t)}
-                                            onChange={() => toggleArrayFilter(setTipos, tipos, t)}
-                                        />
-                                        {t}
-                                    </label>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Filtro: Area M2 */}
-                        <div>
-                            <h3 className="font-bold text-teal-800 text-lg mb-2">Area M2 Cubierta</h3>
-                            <div className="flex flex-col gap-2 w-24 ml-1">
-                                <input type="number" value={areaCubiertaMin} onChange={e => setAreaCubiertaMin(Number(e.target.value))} className="border border-gray-300 p-1 text-sm bg-white" placeholder="Min" />
-                                <input type="number" value={areaCubiertaMax} onChange={e => setAreaCubiertaMax(Number(e.target.value))} className="border border-gray-300 p-1 text-sm bg-white" placeholder="Max" />
-                            </div>
-                        </div>
-
-                        {/* Filtro: Valor */}
-                        <div>
-                            <h3 className="font-bold text-teal-800 text-lg mb-2">Valor</h3>
-                            <div className="flex flex-col gap-2 w-24 ml-1">
-                                <input type="number" value={valorMin} onChange={e => setValorMin(Number(e.target.value))} className="border border-gray-300 p-1 text-sm bg-white" />
-                                <input type="number" value={valorMax} onChange={e => setValorMax(Number(e.target.value))} className="border border-gray-300 p-1 text-sm bg-white" />
-                            </div>
-                        </div>
-
-                        {/* Filtro: Inmobiliaria */}
-                        <div>
-                            <h3 className="font-bold text-teal-800 text-lg mb-2">Inmobiliaria</h3>
-                            <select value={inmobiliaria} onChange={e => setInmobiliaria(e.target.value)} className="w-full border-none p-2 text-sm bg-teal-800 text-white outline-none cursor-pointer">
-                                <option value="Todas">Todas</option>
-                                {opciones.inmobiliarias.map(i => <option key={i} value={i}>{i}</option>)}
-                            </select>
-                        </div>
-
-                        {/* Filtro: Ambientes */}
-                        <div>
-                            <h3 className="font-bold text-teal-800 text-lg mb-2">Ambientes</h3>
-                            <div className="flex flex-col gap-1.5 ml-1">
-                                {opciones.ambientes.map(a => (
-                                    <label key={a} className="flex items-center gap-2 text-sm cursor-pointer text-gray-700">
-                                        <input type="checkbox" className="w-4 h-4 accent-teal-700"
-                                            checked={ambientes.includes(a)}
-                                            onChange={() => toggleArrayFilter(setAmbientes, ambientes, a)}
-                                        />
-                                        {a}
-                                    </label>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Contenido Principal */}
-                    <div className="flex-1 flex flex-col p-6 overflow-hidden">
-                        {/* Header Superior */}
-                        <div className="flex justify-between items-start mb-0">
-                            <div className="flex-1 text-center">
-                                <h2 className="text-2xl font-bold text-teal-800 mb-2 truncate">Análisis de valor de mercado según superficie y número de ambientes</h2>
-                                <div className="flex items-center justify-center gap-4 text-sm font-medium text-gray-600">
-                                    <span>Rooms</span>
-                                    {Object.keys(COLORS).map(r => (
-                                        <div key={r} className="flex items-center gap-1">
-                                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[r] }}></div>
-                                            <span>{r}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                                <div className="flex items-center justify-center gap-6 text-sm font-medium text-gray-600 mt-1">
-                                    <div className="flex items-center gap-1">
-                                        <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                                        <span>Sobrevalorado (+1 SD)</span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                        <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                                        <span>Oportunidad (-1 SD)</span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                        <div className="w-4 border-b-2 border-gray-600"></div>
-                                        <span>Regresión</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Gráfico, KPIs y Links */}
-                        <div className="flex-1 flex relative min-h-0 mb-6 mt-2">
-                            <div className="flex-1 h-full">
-                                <ScatterPlot data={filteredData} />
-                            </div>
-                            <div className="w-64 flex flex-col gap-4 pl-4 justify-start">
-                                {/* KPIs */}
-                                <div className="flex gap-4">
-                                    <div className="bg-gray-200 p-4 text-center flex-1 rounded">
-                                        <div className="text-2xl font-light text-gray-800 mb-1">{formatNumber(avgValorM2)}</div>
-                                        <div className="text-xs text-gray-500 font-medium">Valor M2</div>
-                                    </div>
-                                    <div className="bg-gray-200 p-4 text-center flex-1 rounded">
-                                        <div className="text-2xl font-light text-gray-800 mb-1">{formatNumber(filteredData.length)}</div>
-                                        <div className="text-xs text-gray-500 font-medium">Propiedades</div>
-                                    </div>
-                                </div>
-                                
-                                {/* Links */}
-                                <div className="flex flex-col flex-1 min-h-0 border border-gray-200 rounded">
-                                    <div className="flex justify-between font-bold text-teal-800 border-b border-gray-200 p-2 text-sm bg-gray-50 shrink-0">
-                                        <span className="cursor-pointer hover:text-teal-600" onClick={() => requestLinkSort('url')}>
-                                            Link
-                                        </span>
-                                        <span className="cursor-pointer hover:text-teal-600" onClick={() => requestLinkSort('views')}>
-                                            Views
-                                        </span>
-                                    </div>
-                                    <div className="flex-1 overflow-y-auto table-container text-xs">
-                                        {sortedLinks.slice(0, 100).map((item, idx) => (
-                                            <div key={idx} className={`flex justify-between items-center p-2 border-b border-gray-100 hover:bg-teal-50 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                                                <a href={item.url} target="_blank" rel="noreferrer" className="truncate text-gray-600 hover:text-teal-700 transition-colors w-3/4" title={item.url}>
-                                                    {item.url || 'Sin enlace'}
-                                                </a>
-                                                <span className="w-1/4 text-right text-gray-700 font-medium">
-                                                    {item.views || 0}
-                                                </span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Tablas Inferiores */}
-                        <div className="h-72 grid grid-cols-3 gap-6 min-h-0">
-                            <Table 
-                                title="Real Estate" 
-                                data={realEstateData} 
-                                onRowClick={(name) => setInmobiliaria(inmobiliaria === name ? 'Todas' : name)}
-                                activeFilters={inmobiliaria}
-                            />
-                            <Table 
-                                title="Location" 
-                                data={locationData} 
-                                onRowClick={(name) => toggleArrayFilter(setBarrios, barrios, name)}
-                                activeFilters={barrios}
-                                isLocation={true}
-                            />
-                            <Table 
-                                title="Ambientes" 
-                                data={ambientesData} 
-                                onRowClick={(name) => toggleArrayFilter(setAmbientes, ambientes, name)}
-                                activeFilters={ambientes}
-                            />
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        // Componente de Tabla Reutilizable con Ordenamiento
-        const Table = ({ title, data, onRowClick, activeFilters = [], isLocation = false }) => {
-            const [sortConfig, setSortConfig] = useState({ key: 'quantity', direction: 'desc' });
-
-            const sortedData = useMemo(() => {
-                let sortableItems = [...data];
-                if (sortConfig !== null) {
-                    sortableItems.sort((a, b) => {
-                        let aVal = a[sortConfig.key];
-                        let bVal = b[sortConfig.key];
-                        
-                        // Manejo especial para la columna de nombres (ej. '6+')
-                        if (sortConfig.key === 'name') {
-                            if (a.name === '6+') aVal = 6;
-                            if (b.name === '6+') bVal = 6;
-                            if (typeof aVal === 'string') aVal = aVal.toLowerCase();
-                            if (typeof bVal === 'string') bVal = bVal.toLowerCase();
-                        }
-
-                        if (aVal < bVal) {
-                            return sortConfig.direction === 'asc' ? -1 : 1;
-                        }
-                        if (aVal > bVal) {
-                            return sortConfig.direction === 'asc' ? 1 : -1;
-                        }
-                        return 0;
-                    });
-                }
-                return sortableItems;
-            }, [data, sortConfig]);
-
-            const requestSort = (key) => {
-                let direction = 'desc';
-                if (sortConfig && sortConfig.key === key && sortConfig.direction === 'desc') {
-                    direction = 'asc';
-                }
-                setSortConfig({ key, direction });
-            };
-
-            return (
-                <div className="flex flex-col h-full min-h-0">
-                    <div className="flex justify-between font-bold text-teal-800 border-b-[3px] border-gray-300 pb-2 mb-2 text-base shrink-0">
-                        <span className="cursor-pointer hover:text-teal-600" onClick={() => requestSort('name')}>
-                            {title}
-                        </span>
-                        <div className="flex gap-6">
-                            <span className="cursor-pointer hover:text-teal-600" onClick={() => requestSort('avgM2')}>
-                                Valor M2
-                            </span>
-                            <span className="cursor-pointer hover:text-teal-600" onClick={() => requestSort('quantity')}>
-                                Quantity
-                            </span>
-                        </div>
-                    </div>
-                    <div className="flex-1 overflow-y-auto table-container text-sm pr-1">
-                        {sortedData.map((row, idx) => {
-                            const isActive = Array.isArray(activeFilters) 
-                                ? activeFilters.includes(row.name) 
-                                : activeFilters === row.name;
-                            
-                            return (
-                                <div 
-                                    key={idx} 
-                                    onClick={() => onRowClick && onRowClick(row.name)}
-                                    className={`flex justify-between p-2 cursor-pointer transition-colors ${isActive ? 'bg-teal-100 border-l-4 border-teal-600' : (idx % 2 === 0 ? 'bg-white' : 'bg-gray-100')} hover:bg-teal-50`}
-                                >
-                                    <span className={`truncate ${isLocation ? 'w-2/3' : 'w-1/2'} text-gray-800 font-medium`} title={row.name}>{row.name}</span>
-                                    <div className={`flex gap-6 ${isLocation ? 'w-1/3' : 'w-1/2'} justify-end text-gray-700`}>
-                                        <span className="w-16 text-right">{formatNumber(row.avgM2)}</span>
-                                        <span className="w-16 text-right">{formatNumber(row.quantity)}</span>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-            );
-        };
-
-        // Componente del Gráfico Plotly
-        const ScatterPlot = ({ data }) => {
-            const plotRef = useRef(null);
-
-            useEffect(() => {
-                if (!plotRef.current) return;
-
-                const traces = [];
-                
-                // 1. Calcular Regresión Lineal y Desviación Estándar
-                let m = 0, b = 0, sd = 0, minX = 0, maxX = 0;
-                let validData = data.filter(d => (d.covered_area_m2 > 0 || d.total_area_m2 > 0) && d.price_value > 0);
-                
-                // Filtrar outliers extremos para no romper el gráfico
-                if (validData.length > 4) {
-                    const yValues = validData.map(d => {
-                        const areaForPrice = d.covered_area_m2 || d.total_area_m2 || 1;
-                        return d.price_value / areaForPrice;
-                    }).sort((a, b) => a - b);
-                    
-                    const q1 = yValues[Math.floor(yValues.length * 0.25)];
-                    const q3 = yValues[Math.floor(yValues.length * 0.75)];
-                    const iqr = q3 - q1;
-                    const maxY = q3 + 3 * iqr; // Umbral para outliers
-                    
-                    validData = validData.filter(d => {
-                        const areaForPrice = d.covered_area_m2 || d.total_area_m2 || 1;
-                        const y = d.price_value / areaForPrice;
-                        return y <= maxY;
-                    });
-                }
-                
-                if (validData.length > 1) {
-                    const N = validData.length;
-                    let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
-                    
-                    validData.forEach(d => {
-                        const x = d.covered_area_m2 || d.total_area_m2 || 1;
-                        const logX = Math.log10(x);
-                        const y = d.price_value / x;
-                        sumX += logX;
-                        sumY += y;
-                        sumXY += logX * y;
-                        sumX2 += logX * logX;
-                    });
-                    
-                    m = (N * sumXY - sumX * sumY) / (N * sumX2 - sumX * sumX);
-                    b = (sumY - m * sumX) / N;
-                    
-                    let sumSqRes = 0;
-                    validData.forEach(d => {
-                        const x = d.covered_area_m2 || d.total_area_m2 || 1;
-                        const logX = Math.log10(x);
-                        const y = d.price_value / x;
-                        const predY = m * logX + b;
-                        const res = y - predY;
-                        sumSqRes += res * res;
-                    });
-                    
-                    sd = Math.sqrt(sumSqRes / N);
-                    minX = Math.min(...validData.map(d => d.covered_area_m2 || d.total_area_m2 || 1));
-                    maxX = Math.max(...validData.map(d => d.covered_area_m2 || d.total_area_m2 || 1));
-                    
-                    // Agregar líneas de regresión y márgenes
-                    traces.push({
-                        x: [minX, maxX],
-                        y: [m * Math.log10(minX) + b, m * Math.log10(maxX) + b],
-                        mode: 'lines',
-                        type: 'scatter',
-                        name: 'Regresión',
-                        line: { color: '#4b5563', width: 2 },
-                        hoverinfo: 'name'
-                    });
-                    traces.push({
-                        x: [minX, maxX],
-                        y: [m * Math.log10(minX) + b + sd, m * Math.log10(maxX) + b + sd],
-                        mode: 'lines',
-                        type: 'scatter',
-                        name: '+1 SD',
-                        line: { color: '#ef4444', width: 1, dash: 'dash' },
-                        hoverinfo: 'none'
-                    });
-                    traces.push({
-                        x: [minX, maxX],
-                        y: [m * Math.log10(minX) + b - sd, m * Math.log10(maxX) + b - sd],
-                        mode: 'lines',
-                        type: 'scatter',
-                        name: '-1 SD',
-                        line: { color: '#22c55e', width: 1, dash: 'dash' },
-                        hoverinfo: 'none'
-                    });
-                }
-
-                // Agrupar datos por cantidad de ambientes para asignar colores
-                const grouped = validData.reduce((acc, item) => {
-                    let r = item.rooms || 'N/A';
-                    if (r >= 6) r = '6+';
-                    
-                    if (!acc[r]) acc[r] = { x: [], y: [], text: [], customdata: [], colors: [] };
-                    
-                    const x = item.covered_area_m2 || item.total_area_m2 || 1;
-                    const y = item.price_value / x;
-                    
-                    acc[r].x.push(x);
-                    acc[r].y.push(y);
-                    
-                    // Texto al pasar el mouse
-                    acc[r].text.push(`Área: ${x} m² - Precio: US$ ${formatNumber(item.price_value)}<br>Click para ver propiedad`);
-                    acc[r].customdata.push(item.url); // Guardar URL para el click
-                    
-                    // Determinar color según desviación estándar
-                    let ptColor = COLORS[r] || COLORS[6] || '#9ca3af';
-                    if (validData.length > 1) {
-                        const predY = m * Math.log10(x) + b;
-                        if (y > predY + sd) ptColor = '#ef4444'; // Rojo (Sobrevalorado)
-                        else if (y < predY - sd) ptColor = '#22c55e'; // Verde (Oportunidad)
-                    }
-                    acc[r].colors.push(ptColor);
-                    
-                    return acc;
-                }, {});
-
-                for (const [rooms, traceData] of Object.entries(grouped)) {
-                    traces.push({
-                        x: traceData.x,
-                        y: traceData.y,
-                        text: traceData.text,
-                        customdata: traceData.customdata,
-                        mode: 'markers',
-                        type: 'scatter',
-                        name: rooms,
-                        marker: { color: traceData.colors, size: 7, opacity: 0.8 },
-                        hoverinfo: 'text'
-                    });
-                }
-
-                const layout = {
-                    margin: { t: 0, l: 60, r: 20, b: 40 },
-                    xaxis: { 
-                        title: 'Area M2 Cubierta (Log)', 
-                        type: 'log',
-                        showgrid: true, 
-                        gridcolor: '#f3f4f6', 
-                        zeroline: false,
-                        tickfont: { color: '#6b7280' },
-                        titlefont: { color: '#374151' }
-                    },
-                    yaxis: { 
-                        title: 'Valor por M2', 
-                        showgrid: true, 
-                        gridcolor: '#f3f4f6', 
-                        zeroline: false,
-                        tickfont: { color: '#6b7280' },
-                        titlefont: { color: '#374151' }
-                    },
-                    showlegend: false,
-                    plot_bgcolor: 'white',
-                    paper_bgcolor: 'white',
-                    hovermode: 'closest',
-                    hoverlabel: {
-                        bgcolor: 'white',
-                        font: { size: 12, family: 'Roboto' },
-                        bordercolor: '#e5e7eb',
-                        align: 'left'
-                    }
-                };
-
-                const config = { responsive: true, displayModeBar: false };
-
-                Plotly.newPlot(plotRef.current, traces, layout, config);
-
-                // Agregar evento de click
-                const clickHandler = (eventData) => {
-                    if (eventData.points && eventData.points.length > 0) {
-                        const url = eventData.points[0].customdata;
-                        if (url && url !== 'N/A') {
-                            window.open(url, '_blank');
-                        }
-                    }
-                };
-                
-                plotRef.current.on('plotly_click', clickHandler);
-
-                return () => {
-                    if (plotRef.current && plotRef.current.removeAllListeners) {
-                        plotRef.current.removeAllListeners('plotly_click');
-                    }
-                    Plotly.purge(plotRef.current);
-                };
-            }, [data]);
-
-            return <div ref={plotRef} className="w-full h-full cursor-pointer" />;
-        };
-
-        // Función para generar datos de prueba si falla la conexión a Supabase
-        function generateMockData() {
-            const types = ['Casas', 'Departamentos', 'Locales', 'Oficinas', 'Ph'];
-            const barrios = ['Playa Varese', 'Torreón', 'Lomas De Stella Maris', 'Stella Maris', 'Cabo Corrientes', 'Playa Chica', 'Playa Grande', 'Güemes'];
-            const publishers = ['No Identificado', 'yacoub', 're max feliz', 'girard propiedades', 'century 21', 'homes land'];
-            const mock = [];
-            for (let i = 0; i < 2000; i++) {
-                const area = Math.floor(Math.random() * 220) + 20;
-                const rooms = Math.floor(Math.random() * 6) + 1;
-                // Simular curva de valor por m2 que decrece con el área
-                const baseM2 = 3500 - (area * 6) + (Math.random() * 800);
-                const price = Math.floor(baseM2 * area);
-                mock.push({
-                    id: i,
-                    total_area_m2: area,
-                    price_value: price,
-                    rooms: rooms,
-                    Barrio: barrios[Math.floor(Math.random() * barrios.length)],
-                    type_subtitle: types[Math.floor(Math.random() * types.length)],
-                    publisher: publishers[Math.floor(Math.random() * publishers.length)],
-                    url: `https://www.zonaprop.com.ar/propiedades/mock-${i}.html`
-                });
-            }
-            return mock;
-        }
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
+        <h3 className="font-bold text-sm mt-4 mb-2 teal">Valor (USD)</h3>
+        <div className="flex gap-2">
+          <input type="number" value={valorMin} onChange={e=>setValorMin(Number(e.target.value))} className="w-full border rounded px-2 py-1 text-sm"/>
+          <input type="number" value={valorMax} onChange={e=>setValorMax(Number(e.target.value))} className="w-full border rounded px-2 py-1 text-sm"/>
         </div>
+
+        <h3 className="font-bold text-sm mt-4 mb-2 teal">Antigüedad</h3>
+        <select value={antiguedad} onChange={e=>setAntiguedad(e.target.value)} className="w-full border rounded px-2 py-2 text-sm bg-teal text-white">
+          <option>Todas</option>
+          {ANTIGUEDADES.map(a=><option key={a}>{a}</option>)}
+        </select>
+
+        <h3 className="font-bold text-sm mt-4 mb-2 teal">Cocheras</h3>
+        <div className="flex flex-wrap gap-1">
+          {['Todas','0','1','2','3+'].map(c=>(
+            <span key={c} className={`chip ${cocheras===c?'active':''}`} onClick={()=>setCocheras(c)}>{c}</span>
+          ))}
+        </div>
+
+        <h3 className="font-bold text-sm mt-4 mb-2 teal">Disposición</h3>
+        <div className="flex flex-wrap gap-1">
+          {DISPOSICIONES.map(d=>(
+            <span key={d} className={`chip ${disposiciones.includes(d)?'active':''}`} onClick={()=>toggle(setDisposiciones,disposiciones,d)}>{d}</span>
+          ))}
+        </div>
+
+        <h3 className="font-bold text-sm mt-4 mb-2 teal">Inmobiliaria</h3>
+        <select value={inmobiliaria} onChange={e=>setInmobiliaria(e.target.value)} className="w-full border rounded px-2 py-2 text-sm bg-teal text-white">
+          <option>Todas</option>
+          {INMOBILIARIAS.map(i=><option key={i}>{i}</option>)}
+        </select>
+
+        <h3 className="font-bold text-sm mt-4 mb-2 teal">Ambientes</h3>
+        {['1','2','3','4','5','6+'].map(a=>(
+          <label key={a} className="checkbox-row"><input type="checkbox" checked={ambientes.includes(a)} onChange={()=>toggle(setAmbientes,ambientes,a)}/>{a}</label>
+        ))}
+      </aside>
+
+      <main className="flex-1 flex flex-col">
+        <div className="flex items-center justify-between border-b border-gray-200 px-4 py-2">
+          <div className="font-bold text-sm teal">Análisis $/m²</div>
+          <div className="flex gap-3 py-2">
+            <div className="bg-gray-100 rounded-lg px-4 py-2 text-center">
+              <div className="text-xl font-bold teal">{fmt(avgM2)}</div>
+              <div className="text-[11px] text-gray-500">Valor m² prom.</div>
+            </div>
+            <div className="bg-gray-100 rounded-lg px-4 py-2 text-center">
+              <div className="text-xl font-bold teal">{filtered.length}</div>
+              <div className="text-[11px] text-gray-500">Propiedades</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-4 p-4" style={{minHeight:'480px'}}>
+          <div className="col-span-2">
+            <div ref={plotRef} style={{width:'100%', height:'460px'}}/>
+          </div>
+          <div className="border rounded-lg overflow-hidden flex flex-col" style={{maxHeight:'460px'}}>
+            <div className="bg-teal text-white px-3 py-2">
+              <div className="font-bold text-sm">🔥 Top propiedades según filtros</div>
+              <div className="text-[11px] opacity-80">Ordenado por popularidad relativa al tiempo publicado</div>
+            </div>
+            <div className="table-container overflow-y-auto">
+              <table className="w-full text-xs">
+                <thead className="bg-gray-50 sticky top-0">
+                  <tr>
+                    <th className="text-left p-2 cursor-pointer select-none" onClick={()=>onSortVistas('barrio')}>Propiedad<Arrow active={sortVistas.key==='barrio'} dir={sortVistas.dir}/></th>
+                    <th className="text-right p-2 cursor-pointer select-none" onClick={()=>onSortVistas('price_value')}>Precio<Arrow active={sortVistas.key==='price_value'} dir={sortVistas.dir}/></th>
+                    <th className="text-right p-2 cursor-pointer select-none" onClick={()=>onSortVistas('views')}>Views<Arrow active={sortVistas.key==='views'} dir={sortVistas.dir}/></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {topVistas.slice(0,30).map(d=>(
+                    <tr key={d.posting_id} className="border-t hover:bg-gray-50">
+                      <td className="p-2">
+                        <a href={d.url} target="_blank" className="text-blue-600 font-medium block">{d.real_estate_type} en {d.barrio}</a>
+                        <span className="text-gray-400">{d.covered_area_m2} m² · {d.rooms} amb</span>
+                      </td>
+                      <td className="p-2 text-right">US$ {fmt(d.price_value)}</td>
+                      <td className="p-2 text-right">
+                        <span className="inline-block bg-teal text-white rounded px-1.5 py-0.5 text-[11px]">{d.views}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 p-4 border-t border-gray-200">
+          <div>
+            <h4 className="font-bold text-sm mb-2 teal">Por Inmobiliaria</h4>
+            <div className="table-container overflow-y-auto border rounded-lg" style={{maxHeight:'260px'}}>
+              <table className="w-full text-xs">
+                <thead className="bg-gray-50 sticky top-0"><tr className="text-gray-500">
+                  <th className="text-left p-2 cursor-pointer select-none" onClick={()=>onSortInmob('name')}>Inmobiliaria<Arrow active={sortInmob.key==='name'} dir={sortInmob.dir}/></th>
+                  <th className="text-right p-2 cursor-pointer select-none" onClick={()=>onSortInmob('avgM2')}>Valor m²<Arrow active={sortInmob.key==='avgM2'} dir={sortInmob.dir}/></th>
+                  <th className="text-right p-2 cursor-pointer select-none" onClick={()=>onSortInmob('qty')}>Cant.<Arrow active={sortInmob.key==='qty'} dir={sortInmob.dir}/></th>
+                </tr></thead>
+                <tbody>{porInmobiliaria.map(r=>(
+                  <tr key={r.name} className="border-t hover:bg-gray-50"><td className="p-2">{r.name}</td><td className="p-2 text-right">{fmt(r.avgM2)}</td><td className="p-2 text-right">{r.qty}</td></tr>
+                ))}</tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <h4 className="font-bold text-sm mb-2 teal">Por Barrio</h4>
+            <div className="table-container overflow-y-auto border rounded-lg" style={{maxHeight:'260px'}}>
+              <table className="w-full text-xs">
+                <thead className="bg-gray-50 sticky top-0"><tr className="text-gray-500">
+                  <th className="text-left p-2 cursor-pointer select-none" onClick={()=>onSortBarrio('name')}>Barrio<Arrow active={sortBarrio.key==='name'} dir={sortBarrio.dir}/></th>
+                  <th className="text-right p-2 cursor-pointer select-none" onClick={()=>onSortBarrio('avgM2')}>Valor m²<Arrow active={sortBarrio.key==='avgM2'} dir={sortBarrio.dir}/></th>
+                  <th className="text-right p-2 cursor-pointer select-none" onClick={()=>onSortBarrio('qty')}>Cant.<Arrow active={sortBarrio.key==='qty'} dir={sortBarrio.dir}/></th>
+                </tr></thead>
+                <tbody>{porBarrio.map(r=>(
+                  <tr key={r.name} className="border-t hover:bg-gray-50"><td className="p-2">{r.name}</td><td className="p-2 text-right">{fmt(r.avgM2)}</td><td className="p-2 text-right">{r.qty}</td></tr>
+                ))}</tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
+  );
+};
 
-    <!-- Footer -->
-    <footer>
-        <div class="footer-content">
-            <div class="footer-logo">
-                <img src="./images/Logo.png" alt="Reporte Inmobiliario MDP">
-            </div>
-            
-            <div class="footer-section">
-                <h4>Contacto</h4>
-                <p><strong>Desarrollo por:</strong><br>Facundo Manzo Rodriguez</p>
-                <a href="mailto:rodriguezfacundomdp@gmail.com">rodriguezfacundomdp@gmail.com</a>
-                <a href="tel:+542236233628">223-623-3628</a>
-            </div>
-            
-            <div class="footer-section">
-                <h4>Conectar</h4>
-                <a href="http://www.linkedin.com/in/facundo-rodriguez-83369730a" target="_blank">
-                    LinkedIn
-                </a>
-            </div>
-        </div>
-        
-        <div class="footer-bottom">
-            © 2025 Reporte Inmobiliario Mar del Plata. Todos los derechos reservados.
-        </div>
-    </footer>
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
 </body>
 </html>
