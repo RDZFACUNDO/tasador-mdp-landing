@@ -214,7 +214,7 @@ const App = () => {
 
   const toggle = (setter, arr, val) => setter(arr.includes(val) ? arr.filter(v=>v!==val) : [...arr, val]);
 
-  const filtered = useMemo(()=>data.filter(d=>{
+  const filteredRaw = useMemo(()=>data.filter(d=>{
     if(tipos.length && !tipos.includes(d.real_estate_type)) return false;
     if(d.covered_area_m2 < areaMin || d.covered_area_m2 > areaMax) return false;
     if(d.price_value < valorMin || d.price_value > valorMax) return false;
@@ -231,6 +231,29 @@ const App = () => {
     if(barrios.length && !barrios.includes(d.barrio)) return false;
     return true;
   }),[data,tipos,areaMin,areaMax,valorMin,valorMax,antiguedad,disposiciones,cocheras,inmobiliaria,ambientes,barrios]);
+
+  // Quita outliers de $/m² por IQR (rango intercuartílico) para que el
+  // gráfico, los promedios y las tablas no queden distorsionados por
+  // publicaciones con precio o área mal cargados. Se calcula sobre la
+  // muestra ya filtrada por los controles del sidebar.
+  const filtered = useMemo(() => {
+    const base = filteredRaw.filter(d => d.covered_area_m2 > 0 && d.price_value > 0);
+    if (base.length < 8) return base; // muestra muy chica: no tiene sentido recortar
+    const pm2 = base.map(d => d.price_value / d.covered_area_m2).sort((a,b)=>a-b);
+    const percentil = p => {
+      const idx = (pm2.length - 1) * p;
+      const lo = Math.floor(idx), hi = Math.ceil(idx);
+      return lo === hi ? pm2[lo] : pm2[lo] + (pm2[hi] - pm2[lo]) * (idx - lo);
+    };
+    const q1 = percentil(0.25), q3 = percentil(0.75);
+    const iqr = q3 - q1;
+    const low = q1 - 1.5 * iqr;
+    const high = q3 + 1.5 * iqr;
+    return base.filter(d => {
+      const y = d.price_value / d.covered_area_m2;
+      return y >= low && y <= high;
+    });
+  }, [filteredRaw]);
 
   const avgM2 = useMemo(()=>{
     if(!filtered.length) return 0;
@@ -274,7 +297,7 @@ const App = () => {
   const plotRef = useRef(null);
   useEffect(()=>{
     if(!plotRef.current) return;
-    const valid = filtered.filter(d=>d.covered_area_m2>0);
+    const valid = filtered; // ya sin outliers y con área/precio válidos
     if(!valid.length){ Plotly.purge(plotRef.current); return; }
 
     // Regresión cuadrática en log10(área): y = b0 + b1*u + b2*u^2, u=log10(x)
@@ -418,7 +441,14 @@ const App = () => {
 
       <main className="flex-1 flex flex-col">
         <div className="flex items-center justify-between border-b border-gray-200 px-4 py-2">
-          <div className="font-bold text-sm teal">Análisis $/m²</div>
+          <div>
+            <div className="font-bold text-sm teal">Análisis $/m²</div>
+            {filteredRaw.length > filtered.length && (
+              <div className="text-[11px] text-gray-400">
+                {filteredRaw.length - filtered.length} publicaciones excluidas por precio/m² atípico
+              </div>
+            )}
+          </div>
           <div className="flex gap-3 py-2">
             <div className="bg-gray-100 rounded-lg px-4 py-2 text-center">
               <div className="text-xl font-bold teal">{fmt(avgM2)}</div>
