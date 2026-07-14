@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reporte Inmobiliario - Mar del Plata</title>
-    
-    <meta name="description" content="Valuador de propiedades online en Mar del Plata. Conocé el valor de venta de tu inmueble con inteligencia de datos, mapas de calor y reportes de mercado actualizados.">
-    
+
+    <meta name="description" content="Valuador de propiedades online en Mar del Plata. Conocé el valor de venta de tu inmueble con inteligencia de datos, mapas de calor y reportes de mercado actualizados en vivo.">
+
     <meta property="og:title" content="Reporte Inmobiliario - Mar del Plata">
-    <meta property="og:description" content="Tasaciones inmediatas y análisis del mercado inmobiliario local mediante algoritmos avanzados.">
+    <meta property="og:description" content="Tasaciones inmediatas y análisis del mercado inmobiliario local mediante algoritmos avanzados, con datos actualizados en tiempo real.">
     <meta property="og:image" content="https://reporte-inmobiliario-mdp.com.ar/images/Logo.png">
     <meta property="og:url" content="https://reporte-inmobiliario-mdp.com.ar">
     <meta property="og:type" content="website">
@@ -18,70 +18,140 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Roboto', sans-serif;
             background: #f5f5f5;
             color: #333;
             line-height: 1.6;
         }
-        
+
+        a { color: inherit; }
+
+        :focus-visible {
+            outline: 3px solid #f4a261;
+            outline-offset: 2px;
+        }
+
         /* Header con Banner */
         .header {
             position: relative;
-            height: 400px;
-            background: url('./images/Banner.png') center center/cover;
+            min-height: 460px;
+            background: linear-gradient(180deg, rgba(15, 35, 34, 0.55) 0%, rgba(15, 35, 34, 0.75) 100%), url('./images/Banner.png') center center/cover;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
             color: white;
             overflow: hidden;
+            padding: 40px 24px;
         }
-        
-        .header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.3);
-        }
-        
+
         .header-content {
             position: relative;
             z-index: 2;
-            max-width: 900px;
-            padding: 0 24px;
+            max-width: 780px;
         }
-        
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            padding: 8px 18px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+            backdrop-filter: blur(4px);
+        }
+
+        .eyebrow-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #90e0a0;
+            box-shadow: 0 0 0 3px rgba(144, 224, 160, 0.25);
+        }
+
         .header h1 {
-            font-size: clamp(32px, 6vw, 56px);
-            font-weight: 700;
-            margin-bottom: 16px;
-            letter-spacing: 2px;
+            font-size: clamp(32px, 5.5vw, 52px);
+            font-weight: 900;
+            margin-bottom: 18px;
+            letter-spacing: 0.5px;
             text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
         }
-        
+
         .header p {
-            font-size: clamp(16px, 3vw, 20px);
+            font-size: clamp(15px, 2.4vw, 19px);
             font-weight: 300;
-            max-width: 800px;
-            margin: 0 auto;
+            max-width: 640px;
+            margin: 0 auto 32px;
             line-height: 1.7;
             text-shadow: 1px 1px 4px rgba(0,0,0,0.3);
+            opacity: 0.95;
         }
-        
+
+        .hero-ctas {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 36px;
+            background: #f4a261;
+            color: #2c3e50;
+            text-decoration: none;
+            font-size: 17px;
+            font-weight: 700;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 14px rgba(244, 162, 97, 0.4);
+        }
+
+        .btn-primary:hover {
+            background: #f0924a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(244, 162, 97, 0.5);
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 32px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            font-size: 17px;
+            font-weight: 500;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
         /* Nav */
         nav {
             background: white;
@@ -90,7 +160,7 @@
             top: 0;
             z-index: 100;
         }
-        
+
         nav ul {
             list-style: none;
             display: flex;
@@ -99,11 +169,11 @@
             max-width: 1200px;
             margin: 0 auto;
         }
-        
+
         nav li {
             padding: 0;
         }
-        
+
         nav a {
             display: block;
             padding: 20px 32px;
@@ -113,19 +183,92 @@
             transition: all 0.3s ease;
             border-bottom: 3px solid transparent;
         }
-        
+
         nav a:hover {
             background: #f0f0f0;
             border-bottom-color: #5B8B8A;
         }
-        
+
+        nav a.active {
+            border-bottom-color: #5B8B8A;
+            font-weight: 700;
+        }
+
         /* Container */
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 60px 24px;
         }
-        
+
+        /* Cómo funciona */
+        .steps-section {
+            margin-bottom: 60px;
+        }
+
+        .steps-heading {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+
+        .steps-heading h2 {
+            color: #5B8B8A;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .steps-heading p {
+            color: #777;
+            font-size: 15px;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        @media (max-width: 900px) {
+            .steps-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .step {
+            background: white;
+            border-radius: 12px;
+            padding: 28px 24px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            position: relative;
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #5B8B8A;
+            color: white;
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 16px;
+        }
+
+        .step h3 {
+            font-size: 17px;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .step p {
+            font-size: 14px;
+            color: #666;
+        }
+
         /* Stats + Tasador Promo Grid */
         .main-grid {
             display: grid;
@@ -133,13 +276,13 @@
             gap: 32px;
             margin-bottom: 60px;
         }
-        
+
         @media (max-width: 900px) {
             .main-grid {
                 grid-template-columns: 1fr;
             }
         }
-        
+
         /* Stats Widget */
         .stats-widget {
             background: white;
@@ -147,11 +290,11 @@
             padding: 32px;
             box-shadow: 0 4px 16px rgba(0,0,0,0.08);
         }
-        
+
         .widget-container {
             background: #ffffff;
         }
-        
+
         .main-title {
             text-align: center;
             color: #5B8B8A;
@@ -159,7 +302,7 @@
             margin: 0 0 20px 0;
             font-weight: 800;
         }
-        
+
         .chart-subtitle {
             text-align: center;
             font-size: 11px;
@@ -169,12 +312,12 @@
             margin: 0 0 10px 0;
             font-weight: 600;
         }
-        
+
         .controls {
             margin-bottom: 20px;
             text-align: center;
         }
-        
+
         select {
             padding: 12px;
             border-radius: 8px;
@@ -189,11 +332,11 @@
             outline: none;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
-        
+
         select:hover {
             border-color: #888;
         }
-        
+
         .stats-grid {
             display: flex;
             flex-wrap: wrap;
@@ -201,7 +344,7 @@
             justify-content: center;
             gap: 15px;
         }
-        
+
         .price-list-container {
             flex: 1;
             min-width: 180px;
@@ -210,7 +353,7 @@
             justify-content: center;
             padding: 10px;
         }
-        
+
         h3 {
             margin: 0 0 15px 0;
             font-size: 13px;
@@ -222,7 +365,7 @@
             border-bottom: 1px solid #eee;
             padding-bottom: 8px;
         }
-        
+
         .price-row {
             display: flex;
             justify-content: space-between;
@@ -231,14 +374,14 @@
             border-bottom: 1px dashed #eee;
             font-size: 13px;
         }
-        
+
         .price-label {
             display: flex;
             align-items: center;
             font-weight: 500;
             color: #555;
         }
-        
+
         .dot {
             width: 10px;
             height: 10px;
@@ -246,20 +389,20 @@
             margin-right: 8px;
             display: inline-block;
         }
-        
+
         .price-value {
             font-weight: 700;
             font-size: 15px;
             color: #333;
         }
-        
+
         .unit {
             font-size: 10px;
             color: #999;
             font-weight: 400;
             margin-left: 2px;
         }
-        
+
         .chart-box {
             flex: 1;
             min-width: 220px;
@@ -267,44 +410,54 @@
             display: flex;
             flex-direction: column;
         }
-        
+
         .canvas-container {
             position: relative;
             height: 200px;
             width: 100%;
         }
-        
+
         .general-avg {
             text-align: center;
             margin-bottom: 15px;
         }
-        
+
         .big-number {
             font-size: 32px;
             font-weight: 800;
             color: #5B8B8A;
             line-height: 1;
         }
-        
+
         .subtitle {
             font-size: 12px;
             color: #999;
         }
-        
-        #loadingMsg {
+
+        #loadingMsg, #cardsLoadingMsg {
             text-align: center;
             color: #666;
             font-size: 14px;
             padding: 20px;
         }
-        
+
+        #errorMsg {
+            text-align: center;
+            color: #b45309;
+            font-size: 13px;
+            padding: 12px 16px;
+            background: #fff7ed;
+            border-radius: 8px;
+            display: none;
+        }
+
         .hidden {
             display: none;
         }
-        
+
         /* Tasador Promo Card */
         .tasador-promo {
-            background: white;
+            background: linear-gradient(160deg, #5B8B8A 0%, #4a7a79 100%);
             border-radius: 12px;
             padding: 40px;
             box-shadow: 0 4px 16px rgba(0,0,0,0.08);
@@ -312,11 +465,12 @@
             flex-direction: column;
             justify-content: center;
             text-align: center;
+            color: white;
         }
-        
+
         .tasador-promo h2 {
-            font-size: 28px;
-            color: #5B8B8A;
+            font-size: 26px;
+            color: white;
             margin-bottom: 16px;
             font-weight: 700;
             display: flex;
@@ -324,56 +478,74 @@
             justify-content: center;
             gap: 12px;
         }
-        
+
         .tasador-promo p {
-            color: #666;
+            color: rgba(255,255,255,0.9);
             font-size: 16px;
             line-height: 1.7;
             margin-bottom: 16px;
         }
-        
+
         .tasador-promo .description {
-            background: #f8f9fa;
+            background: rgba(255,255,255,0.1);
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 24px;
-            border-left: 4px solid #5B8B8A;
+            border-left: 4px solid #f4a261;
             text-align: left;
         }
-        
+
         .tasador-promo .description p {
             font-size: 14px;
-            color: #555;
+            color: rgba(255,255,255,0.9);
             margin: 0;
         }
-        
+
         .cta-button-large {
             display: inline-block;
             padding: 18px 48px;
-            background: #5B8B8A;
-            color: white;
+            background: #f4a261;
+            color: #2c3e50;
             text-decoration: none;
             font-size: 18px;
             font-weight: 700;
             border-radius: 8px;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(91, 139, 138, 0.3);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
-        
+
         .cta-button-large:hover {
-            background: #4a7a79;
+            background: #f0924a;
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(91, 139, 138, 0.4);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.25);
         }
-        
+
         /* Cards Section */
+        .cards-section-heading {
+            margin-bottom: 24px;
+        }
+
+        .cards-section-heading h2 {
+            color: #5B8B8A;
+            font-size: 26px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 6px;
+        }
+
+        .cards-section-heading p {
+            text-align: center;
+            color: #999;
+            font-size: 13px;
+        }
+
         .cards-section {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 32px;
             margin-bottom: 60px;
         }
-        
+
         .property-card {
             background: white;
             border-radius: 12px;
@@ -381,23 +553,23 @@
             box-shadow: 0 4px 16px rgba(0,0,0,0.08);
             transition: all 0.3s ease;
         }
-        
+
         .property-card:hover {
             transform: translateY(-8px);
             box-shadow: 0 8px 24px rgba(0,0,0,0.12);
         }
-        
+
         .property-card img {
-        width: 100%;
-        height: 240px;
-        object-fit: cover;
-        object-position: 50% 40%; /* 50% centrado horizontal, 40% un poquito más arriba del centro */
+            width: 100%;
+            height: 240px;
+            object-fit: cover;
+            object-position: 50% 40%;
         }
-        
+
         .card-content {
             padding: 24px;
         }
-        
+
         .card-content h3 {
             font-size: 22px;
             color: #5B8B8A;
@@ -407,14 +579,31 @@
             padding: 0;
             text-transform: none;
             letter-spacing: normal;
+            min-height: 30px;
         }
-        
+
         .card-content p {
             color: #666;
             line-height: 1.7;
             font-size: 15px;
+            min-height: 20px;
         }
-        
+
+        .skeleton-line {
+            display: inline-block;
+            height: 14px;
+            width: 70%;
+            background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s infinite;
+            border-radius: 4px;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
         /* Google Slides Section */
         .slides-section {
             background: white;
@@ -423,7 +612,7 @@
             box-shadow: 0 4px 16px rgba(0,0,0,0.08);
             margin-bottom: 60px;
         }
-        
+
         .slides-section h2 {
             font-size: 32px;
             color: #5B8B8A;
@@ -431,16 +620,16 @@
             text-align: center;
             font-weight: 700;
         }
-        
+
         .slides-container {
             position: relative;
             width: 100%;
-            padding-top: 56.25%; /* 16:9 ratio */
+            padding-top: 56.25%;
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 4px 16px rgba(0,0,0,0.1);
         }
-        
+
         .slides-container iframe {
             position: absolute;
             top: 0;
@@ -449,7 +638,7 @@
             height: 100%;
             border: none;
         }
-        
+
         /* Note Section */
         .note-section {
             background: white;
@@ -458,94 +647,94 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             margin-bottom: 60px;
         }
-        
+
         .note-section p {
             font-size: 13px;
             color: #666;
             line-height: 1.8;
             margin-bottom: 16px;
         }
-        
+
         .note-section ul {
             font-size: 13px;
             color: #666;
             line-height: 1.8;
             margin-left: 20px;
         }
-        
+
         /* Footer */
         footer {
             background: #2c3e50;
             color: white;
-            padding: 40px 24px 20px; /* Reducimos el espacio arriba y abajo */
+            padding: 40px 24px 20px;
         }
-        
+
         .footer-content {
             max-width: 1000px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Columnas más juntas */
-            gap: 32px; /* Reducimos el espacio entre las 3 columnas */
-            margin-bottom: 24px; /* Menos espacio antes de la línea final */
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 32px;
+            margin-bottom: 24px;
         }
-        
+
         .footer-logo {
             text-align: center;
         }
-        
+
         .footer-logo img {
-            max-width: 140px; /* Achicamos solo el logo */
+            max-width: 140px;
             height: auto;
             margin-bottom: 12px;
-            border-radius: 8px; /* Un pequeño redondeo para el cuadrado blanco */
+            border-radius: 8px;
         }
-        
+
         .footer-section h4 {
-            font-size: 18px; /* Tamaño original */
+            font-size: 18px;
             margin-bottom: 16px;
             color: #5B8B8A;
         }
-        
+
         .footer-section p,
         .footer-section a {
             color: rgba(255, 255, 255, 0.8);
             text-decoration: none;
             display: block;
             margin-bottom: 8px;
-            font-size: 16px; /* Tamaño original */
+            font-size: 16px;
             transition: color 0.3s ease;
         }
-        
+
         .footer-section a:hover {
             color: #5B8B8A;
         }
-        
+
         .footer-bottom {
             text-align: center;
-            padding-top: 24px; /* Espacio original */
+            padding-top: 24px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             color: rgba(255, 255, 255, 0.6);
-            font-size: 14px; /* Tamaño original */
+            font-size: 14px;
         }
-        
+
         /* Responsive */
         @media (max-width: 768px) {
             .header {
-                height: 300px;
+                min-height: 380px;
             }
-            
+
             nav a {
                 padding: 16px 20px;
             }
-            
+
             .container {
                 padding: 40px 16px;
             }
-            
+
             .main-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .cards-section {
                 grid-template-columns: 1fr;
             }
@@ -556,37 +745,69 @@
     <!-- Header con Banner -->
     <header class="header">
         <div class="header-content">
+            <span class="eyebrow"><span class="eyebrow-dot"></span> Datos actualizados en vivo · Mar del Plata</span>
             <h1>REPORTE INMOBILIARIO MDP</h1>
             <p>
-                Inteligencia de datos aplicada al sector inmobiliario de Mar del Plata. 
-                Analiza el mercado en tiempo real mediante tasaciones inmediatas, mapas de valor 
+                Inteligencia de datos aplicada al sector inmobiliario de Mar del Plata.
+                Analiza el mercado en tiempo real mediante tasaciones inmediatas, mapas de valor
                 por barrio, monitoreo y reporting constante de la oferta local.
             </p>
+            <div class="hero-ctas">
+                <a href="tasador.html" class="btn-primary">🏠 Tasar mi propiedad</a>
+                <a href="analisis.html" class="btn-secondary">📊 Ver análisis del mercado</a>
+            </div>
         </div>
     </header>
-    
+
     <!-- Nav -->
     <nav>
         <ul>
-            <li><a href="index.html">Reporte Inmobiliario</a></li>
+            <li><a href="index.html" class="active">Reporte Inmobiliario</a></li>
             <li><a href="mapa-calor.html">Mapa de calor</a></li>
             <li><a href="analisis.html">Análisis Estadístico</a></li>
             <li><a href="tasador.html">Tasador</a></li>
         </ul>
     </nav>
-    
+
     <!-- Main Content -->
     <div class="container">
+
+        <!-- Cómo funciona -->
+        <section class="steps-section">
+            <div class="steps-heading">
+                <h2>¿Cómo funciona el Tasador?</h2>
+                <p>Tres pasos, resultado en segundos</p>
+            </div>
+            <div class="steps-grid">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Contanos sobre tu propiedad</h3>
+                    <p>Superficie, ambientes, barrio y algunas características más del inmueble.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>El algoritmo analiza el mercado</h3>
+                    <p>Compara tu propiedad contra miles de publicaciones reales de Mar del Plata, actualizadas en vivo.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Recibí tu tasación</h3>
+                    <p>Precio estimado y rango de valores, con el detalle de qué factores lo explican.</p>
+                </div>
+            </div>
+        </section>
+
         <!-- Grid: Stats + Tasador Promo -->
         <div class="main-grid">
             <!-- Stats Widget -->
             <div class="stats-widget">
                 <div class="widget-container">
                     <div id="loadingMsg">⏳ Procesando datos del mercado...</div>
+                    <div id="errorMsg"></div>
                     <div id="dashboardContent" class="hidden">
                         <h2 class="main-title">Explora el precio por barrio</h2>
                         <div class="controls">
-                            <select id="zoneSelect" onchange="updateDashboard()">
+                            <select id="zoneSelect" onchange="updateDashboard()" aria-label="Seleccionar zona">
                                 <option value="">Selecciona una zona...</option>
                             </select>
                         </div>
@@ -609,19 +830,19 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Tasador Promo -->
             <div class="tasador-promo">
                 <h2>🏠 TASADOR ONLINE: MAR DEL PLATA</h2>
                 <p>
-                    Es un valuador de propiedades online. En muy pocos clicks, 
+                    Es un valuador de propiedades online. En muy pocos clicks,
                     podrás conocer el valor de venta de una propiedad.
                 </p>
                 <div class="description">
                     <p>
-                        Tanto el precio estimado como el rango de precios surgen de un modelo 
-                        algorítmico que considera tanto características intrínsecas del inmueble 
-                        (como la superficie y la cantidad de ambientes) como aquellas relacionadas 
+                        Tanto el precio estimado como el rango de precios surgen de un modelo
+                        algorítmico que considera tanto características intrínsecas del inmueble
+                        (como la superficie y la cantidad de ambientes) como aquellas relacionadas
                         al contexto de la misma (como el barrio y la ubicación).
                     </p>
                 </div>
@@ -630,203 +851,190 @@
                 </a>
             </div>
         </div>
-        
+
         <!-- Property Cards -->
+        <div class="cards-section-heading">
+            <h2>El mercado hoy, en números</h2>
+            <p id="cardsLoadingMsg">⏳ Calculando promedios desde la base de datos...</p>
+        </div>
         <div class="cards-section">
             <div class="property-card">
-                <img src="./images/Edificio.png" alt="Departamentos">
+                <img src="./images/Edificio.png" alt="Departamentos" loading="lazy">
                 <div class="card-content">
-                    <h3>Departamentos: $2.352/m²</h3>
-                    <p>
-                        El departamento monoambiente medio de 25m² se vende por $2.315 ($57.875 total). 
-                        El departamento medio de 2 ambientes y 40m² se vende por $2.455 ($98.200 total). 
-                        El departamento medio de 3 ambientes y 70m² se vende por $2.340 ($163.800 total).
-                    </p>
+                    <h3 id="cardDeptoTitle"><span class="skeleton-line"></span></h3>
+                    <p id="cardDeptoBody"><span class="skeleton-line"></span></p>
                 </div>
             </div>
-            
+
             <div class="property-card">
-                <img src="./images/Chalet.png" alt="Casas">
+                <img src="./images/Chalet.png" alt="Casas" loading="lazy">
                 <div class="card-content">
-                    <h3>El precio promedio de las casas es de $261.974</h3>
-                    <p>
-                        La casa promedio de 3 dormitorios tiene un valor de $263.271. 
-                        La casa promedio de 4 dormitorios tiene un valor de $368.292.
-                    </p>
+                    <h3 id="cardCasaTitle"><span class="skeleton-line"></span></h3>
+                    <p id="cardCasaBody"><span class="skeleton-line"></span></p>
                 </div>
             </div>
-            
+
             <div class="property-card">
-                <img src="./images/Terreno.png" alt="Terrenos">
+                <img src="./images/Terreno.png" alt="Terrenos" loading="lazy">
                 <div class="card-content">
-                    <h3>El precio promedio de los terrenos es de $169/m²</h3>
-                    <p>
-                        El barrio con mayor cantidad de terrenos publicados es "Los Acantilados" con un 
-                        precio medio de $58.367, seguido por "Las Sierras de los Padres" con un precio 
-                        medio de $53.510.
-                    </p>
+                    <h3 id="cardTerrenoTitle"><span class="skeleton-line"></span></h3>
+                    <p id="cardTerrenoBody"><span class="skeleton-line"></span></p>
                 </div>
             </div>
         </div>
-        
+
         <!-- Google Slides Section -->
         <section class="slides-section">
-            <h2>📊 Reporte Inmobiliario Febrero 2026</h2>
+            <h2>📊 Reporte Inmobiliario Mar del Plata</h2>
             <div class="slides-container">
-                <iframe 
-                    src="https://docs.google.com/presentation/d/1MduhW5djqhvjRYtoMoWSHWFBeJyPMXVCifEzFb-R5M4/embed?start=true&loop=true&delayms=5000&slide=id.g3940369b8a3_1_507" 
-                    frameborder="0" 
-                    allowfullscreen="true" 
-                    mozallowfullscreen="true" 
+                <iframe
+                    src="https://docs.google.com/presentation/d/1MduhW5djqhvjRYtoMoWSHWFBeJyPMXVCifEzFb-R5M4/embed?start=true&loop=true&delayms=5000&slide=id.g3940369b8a3_1_507"
+                    frameborder="0"
+                    allowfullscreen="true"
+                    mozallowfullscreen="true"
                     webkitallowfullscreen="true">
                 </iframe>
             </div>
         </section>
-        
+
         <!-- Nota al pie -->
         <div class="note-section">
             <p style="font-weight: 600; margin-bottom: 12px;">
-                Los datos están basados sobre propiedades que:
+                Los datos se actualizan en vivo desde nuestra base y están basados sobre propiedades que:
             </p>
             <ul>
                 <li>Precio mayor a USD 10.000 y menor a 1.500.000</li>
                 <li>M² mayor a 20 y menor a 1.000</li>
             </ul>
             <p style="font-size: 12px; color: #999; margin-top: 16px; font-style: italic;">
-                *valores expresados en dólares<br>
-                **La superficie de las casas contempla el tamaño del terreno, lo que disminuye su valor por m².
+                *valores expresados en dólares
             </p>
         </div>
     </div>
-    
+
     <!-- Footer -->
     <footer>
         <div class="footer-content">
             <div class="footer-logo">
-                <img src="./images/Logo.png" alt="Reporte Inmobiliario MDP">
+                <img src="./images/Logo.png" alt="Reporte Inmobiliario MDP" loading="lazy">
             </div>
-            
+
             <div class="footer-section">
                 <h4>Contacto</h4>
                 <p><strong>Desarrollo por:</strong><br>Facundo Manzo Rodriguez</p>
                 <a href="mailto:rodriguezfacundomdp@gmail.com">rodriguezfacundomdp@gmail.com</a>
                 <a href="tel:+542236233628">223-623-3628</a>
             </div>
-            
+
             <div class="footer-section">
                 <h4>Conectar</h4>
-                <a href="http://www.linkedin.com/in/facundo-rodriguez-83369730a" target="_blank">
+                <a href="http://www.linkedin.com/in/facundo-rodriguez-83369730a" target="_blank" rel="noopener">
                     LinkedIn
                 </a>
             </div>
         </div>
-        
+
         <div class="footer-bottom">
-            © 2025 Reporte Inmobiliario Mar del Plata. Todos los derechos reservados.
+            © 2026 Reporte Inmobiliario Mar del Plata. Todos los derechos reservados.
         </div>
     </footer>
-    
+
     <!-- Widget Script -->
     <script>
-        const URL_DATOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTI8h4Fd4OZ70B3ZLFTd6MFkya_ZiMOrHBaYOEcowx6A1TAo3yVyfoSYJPqveCX52DelILBeUhHjzdl/pub?gid=352634514&single=true&output=csv";
-        
+        // ==========================================
+        // Conexión a Supabase (clave anónima: es segura de exponer en el
+        // frontend porque la tabla tiene RLS habilitado con policy de solo
+        // lectura para el rol "anon" — nunca poner acá la service_role key)
+        // ==========================================
+        const SUPABASE_URL = 'https://pntruonwgiotzdslnjgc.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_kYZO7LDBdyhZ6qNZ71gEHA_UQ4hrznE';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // El dato crudo en Supabase usa "Apartamento" (nomenclatura del scraper),
+        // pero en Argentina se dice "Departamento" — se traduce solo para mostrar.
+        const ETIQUETAS_TIPO = { 'Apartamento': 'Departamento' };
+        const etiquetaTipo = t => ETIQUETAS_TIPO[t] || t;
+
         Chart.register(ChartDataLabels);
         let processedData = {};
         let myChart = null;
-        const chartLabels = ['Departamentos', 'Casas', 'PHs', 'Locales'];
+        const chartLabels = ['Departamentos', 'Casas', 'PHs', 'Otros'];
         const chartColors = ['#5B8B8A', '#e9c46a', '#f4a261', '#e76f51'];
-        
-        const formatCurrency = (num) => num.toLocaleString('es-AR', {maximumFractionDigits: 0});
-        
-        function cleanParse(valStr) {
-            if (!valStr) return 0;
-            let clean = valStr.toString().replace(/["$a-zA-Z\s]/g, '');
-            if (clean.indexOf(',') > -1) {
-                clean = clean.replace(/\./g, '');
-                clean = clean.replace(',', '.');
-            } else {
-                clean = clean.replace(/\./g, '');
+
+        const formatCurrency = (num) => Math.round(num).toLocaleString('es-AR', {maximumFractionDigits: 0});
+
+        // Trae TODAS las filas de la tabla, paginando de a 1000
+        // (límite por defecto de PostgREST/Supabase por request).
+        async function fetchTodasLasPropiedades() {
+            const PAGE = 1000;
+            let desde = 0;
+            let todas = [];
+            while (true) {
+                const { data, error } = await supabaseClient
+                    .from('propiedades_mdp')
+                    .select('barrio, real_estate_type, price_value, covered_area_m2, rooms')
+                    .range(desde, desde + PAGE - 1);
+                if (error) throw error;
+                if (!data || data.length === 0) break;
+                todas = todas.concat(data);
+                if (data.length < PAGE) break;
+                desde += PAGE;
             }
-            return parseFloat(clean) || 0;
+            return todas;
         }
-        
-        async function fetchData() {
-            try {
-                const response = await fetch(URL_DATOS);
-                if (!response.ok) throw new Error("Error de red");
-                const dataText = await response.text();
-                
-                const rows = dataText.split('\n').slice(1);
-                const rawInput = rows.map(row => {
-                    const cols = row.split(',');
-                    if (cols.length < 7) return null;
-                    return {
-                        loc: cols[0].trim(),
-                        type: cols[1].trim(),
-                        val: cleanParse(cols[5]),
-                        area: cleanParse(cols[6])
-                    };
-                }).filter(item => item !== null);
-                
-                processData(rawInput);
-                initDashboard();
-                document.getElementById('loadingMsg').style.display = 'none';
-                document.getElementById('dashboardContent').classList.remove('hidden');
-            } catch (error) {
-                console.error(error);
-                document.getElementById('loadingMsg').innerText = "⚠️ Error leyendo datos. Verifica las columnas.";
-            }
+
+        function clasificarTipo(tipoCrudo) {
+            const tipo = etiquetaTipo(tipoCrudo || '').toLowerCase();
+            if (tipo.includes('departamento')) return 0;
+            if (tipo.includes('casa')) return 1;
+            if (tipo.includes('ph')) return 2;
+            return 3;
         }
-        
+
         function processData(rawInput) {
             processedData = {};
             rawInput.forEach(row => {
-                const zone = row.loc;
+                const zone = row.barrio;
                 if (!zone) return;
-                let typeIndex = -1;
-                const type = row.type.toLowerCase();
-                if(type.includes('departamento')) typeIndex = 0;
-                else if(type.includes('casa')) typeIndex = 1;
-                else if(type.includes('ph')) typeIndex = 2;
-                else typeIndex = 3;
-                
-                if(!processedData[zone]) {
+                const typeIndex = clasificarTipo(row.real_estate_type);
+
+                if (!processedData[zone]) {
                     processedData[zone] = { totalVal: 0, totalArea: 0, vals: [0,0,0,0], areas: [0,0,0,0] };
                 }
-                
-                if(row.val > 0 && row.area > 0) {
-                    processedData[zone].totalVal += row.val;
-                    processedData[zone].totalArea += row.area;
-                    processedData[zone].vals[typeIndex] += row.val;
-                    processedData[zone].areas[typeIndex] += row.area;
+
+                if (row.price_value > 0 && row.covered_area_m2 > 0) {
+                    processedData[zone].totalVal += row.price_value;
+                    processedData[zone].totalArea += row.covered_area_m2;
+                    processedData[zone].vals[typeIndex] += row.price_value;
+                    processedData[zone].areas[typeIndex] += row.covered_area_m2;
                 }
             });
         }
-        
+
         function initDashboard() {
             const select = document.getElementById('zoneSelect');
             select.innerHTML = '';
-            
+
             const topZones = ["Centro", "Plaza Colón", "La Perla", "Güemes", "Playa Grande", "Chauvín", "Constitución"];
             const allZones = Object.keys(processedData).sort();
             const otherZones = allZones.filter(z => !topZones.includes(z));
-            
+
             const addOption = (val, text, parent) => {
                 const opt = document.createElement('option');
                 opt.value = val; opt.text = text; parent.appendChild(opt);
             };
-            
+
             if (processedData["Centro"]) addOption("Centro", "🏙️ Centro", select);
             else if (allZones.length > 0) addOption(allZones[0], `📍 ${allZones[0]}`, select);
-            
+
             const grpTop = document.createElement('optgroup'); grpTop.label = "--- DESTACADOS ---";
             topZones.filter(z => processedData[z] && z !== "Centro").forEach(z => addOption(z, z, grpTop));
             select.appendChild(grpTop);
-            
+
             const grpOthers = document.createElement('optgroup'); grpOthers.label = "--- BARRIOS A-Z ---";
             otherZones.forEach(z => addOption(z, z, grpOthers));
             select.appendChild(grpOthers);
-            
+
             const ctx = document.getElementById('myRealEstateChart').getContext('2d');
             myChart = new Chart(ctx, {
                 type: 'doughnut',
@@ -877,31 +1085,31 @@
                     animation: { animateScale: true }
                 }
             });
-            
+
             updateDashboard();
         }
-        
+
         function updateDashboard() {
             const zone = document.getElementById('zoneSelect').value;
             const data = processedData[zone];
             const listContainer = document.getElementById('priceList');
             const mainDisplay = document.getElementById('mainPriceDisplay');
-            
+
             if (!data) return;
-            
+
             const avgGlobal = data.totalArea > 0 ? (data.totalVal / data.totalArea) : 0;
             mainDisplay.innerText = `USD ${formatCurrency(avgGlobal)}`;
-            
+
             listContainer.innerHTML = '';
             const chartData = [];
-            
+
             chartLabels.forEach((label, index) => {
                 const val = data.vals[index];
                 const area = data.areas[index];
                 const priceM2 = area > 0 ? (val / area) : 0;
-                
+
                 chartData.push(area);
-                
+
                 if (priceM2 > 0) {
                     const color = chartColors[index];
                     const row = document.createElement('div');
@@ -913,14 +1121,134 @@
                     listContainer.appendChild(row);
                 }
             });
-            
+
             if (myChart) {
                 myChart.data.datasets[0].data = chartData;
                 myChart.update();
             }
         }
-        
-        fetchData();
+
+        // ==========================================
+        // Tarjetas de propiedades (Departamentos / Casas / Terrenos)
+        // calculadas en vivo a partir de los mismos datos de Supabase.
+        // ==========================================
+        function promedioPonderado(rows) {
+            const validas = rows.filter(r => r.price_value > 0 && r.covered_area_m2 > 0);
+            const totalVal = validas.reduce((s, r) => s + r.price_value, 0);
+            const totalArea = validas.reduce((s, r) => s + r.covered_area_m2, 0);
+            return totalArea > 0 ? totalVal / totalArea : 0;
+        }
+
+        // Mismo criterio que se describe en la nota al pie: precio entre USD 10.000
+        // y 1.500.000, y superficie cubierta entre 20 (inclusive) y 1.000 m² (exclusive).
+        function dentroDeRango(r) {
+            return r.price_value > 10000 && r.price_value < 1500000
+                && r.covered_area_m2 >= 20 && r.covered_area_m2 < 1000;
+        }
+
+        function renderCards(rawInputSinFiltrar) {
+            const rawInput = rawInputSinFiltrar.filter(dentroDeRango);
+
+            // --- Departamentos ---
+            const deptos = rawInput.filter(r => etiquetaTipo(r.real_estate_type) === 'Departamento' && r.price_value > 0 && r.covered_area_m2 > 0);
+            if (deptos.length > 0) {
+                const pm2 = promedioPonderado(deptos);
+                document.getElementById('cardDeptoTitle').innerText = `Departamentos: USD ${formatCurrency(pm2)}/m²`;
+
+                const bucket = (n) => deptos.filter(r => r.rooms === n);
+                const describirBucket = (rows, label) => {
+                    if (rows.length === 0) return null;
+                    const areaProm = rows.reduce((s,r)=>s+r.covered_area_m2,0) / rows.length;
+                    const precioProm = rows.reduce((s,r)=>s+r.price_value,0) / rows.length;
+                    return `El ${label} medio de ${Math.round(areaProm)}m² se vende por USD ${formatCurrency(precioProm)}.`;
+                };
+                const frases = [
+                    describirBucket(bucket(1), 'monoambiente'),
+                    describirBucket(bucket(2), 'departamento de 2 ambientes'),
+                    describirBucket(bucket(3), 'departamento de 3 ambientes'),
+                ].filter(Boolean);
+                document.getElementById('cardDeptoBody').innerText = frases.length
+                    ? frases.join(' ')
+                    : 'Sin datos suficientes por cantidad de ambientes todavía.';
+            } else {
+                document.getElementById('cardDeptoTitle').innerText = 'Departamentos';
+                document.getElementById('cardDeptoBody').innerText = 'Datos no disponibles por el momento.';
+            }
+
+            // --- Casas ---
+            const casas = rawInput.filter(r => etiquetaTipo(r.real_estate_type) === 'Casa' && r.price_value > 0);
+            if (casas.length > 0) {
+                const precioProm = casas.reduce((s,r)=>s+r.price_value,0) / casas.length;
+                document.getElementById('cardCasaTitle').innerText = `El precio promedio de las casas es de USD ${formatCurrency(precioProm)}`;
+
+                const bucket = (n) => casas.filter(r => r.rooms === n);
+                const describirBucket = (rows, label) => {
+                    if (rows.length === 0) return null;
+                    const precio = rows.reduce((s,r)=>s+r.price_value,0) / rows.length;
+                    return `La casa promedio de ${label} tiene un valor de USD ${formatCurrency(precio)}.`;
+                };
+                const frases = [
+                    describirBucket(bucket(3), '3 ambientes'),
+                    describirBucket(bucket(4), '4 ambientes'),
+                ].filter(Boolean);
+                document.getElementById('cardCasaBody').innerText = frases.length
+                    ? frases.join(' ')
+                    : 'Sin datos suficientes por cantidad de ambientes todavía.';
+            } else {
+                document.getElementById('cardCasaTitle').innerText = 'Casas';
+                document.getElementById('cardCasaBody').innerText = 'Datos no disponibles por el momento.';
+            }
+
+            // --- Terrenos ---
+            const terrenos = rawInput.filter(r => /terreno|lote/i.test(r.real_estate_type || '') && r.price_value > 0 && r.covered_area_m2 > 0);
+            if (terrenos.length > 0) {
+                const pm2 = promedioPonderado(terrenos);
+                document.getElementById('cardTerrenoTitle').innerText = `El precio promedio de los terrenos es de USD ${formatCurrency(pm2)}/m²`;
+
+                const porBarrio = {};
+                terrenos.forEach(r => {
+                    if (!r.barrio) return;
+                    if (!porBarrio[r.barrio]) porBarrio[r.barrio] = { count: 0, totalVal: 0 };
+                    porBarrio[r.barrio].count += 1;
+                    porBarrio[r.barrio].totalVal += r.price_value;
+                });
+                const barrios = Object.entries(porBarrio).sort((a,b) => b[1].count - a[1].count);
+                if (barrios.length > 0) {
+                    const [nombre, info] = barrios[0];
+                    const precioMedio = info.totalVal / info.count;
+                    document.getElementById('cardTerrenoBody').innerText = `El barrio con mayor cantidad de terrenos publicados es "${nombre}" con un precio medio de USD ${formatCurrency(precioMedio)}.`;
+                } else {
+                    document.getElementById('cardTerrenoBody').innerText = '';
+                }
+            } else {
+                document.getElementById('cardTerrenoTitle').innerText = 'Terrenos';
+                document.getElementById('cardTerrenoBody').innerText = 'Datos no disponibles por el momento.';
+            }
+
+            document.getElementById('cardsLoadingMsg').style.display = 'none';
+        }
+
+        async function init() {
+            try {
+                const rawInput = await fetchTodasLasPropiedades();
+
+                processData(rawInput);
+                initDashboard();
+                document.getElementById('loadingMsg').style.display = 'none';
+                document.getElementById('dashboardContent').classList.remove('hidden');
+
+                renderCards(rawInput);
+            } catch (error) {
+                console.error('Error al cargar datos de Supabase:', error);
+                document.getElementById('loadingMsg').style.display = 'none';
+                const errBox = document.getElementById('errorMsg');
+                errBox.style.display = 'block';
+                errBox.innerText = '⚠️ No se pudieron cargar los datos del mercado. Probá recargar la página en unos minutos.';
+                document.getElementById('cardsLoadingMsg').innerText = '⚠️ No se pudieron cargar los datos.';
+            }
+        }
+
+        init();
     </script>
 </body>
 </html>
