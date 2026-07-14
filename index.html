@@ -434,7 +434,7 @@
             color: #999;
         }
 
-        #loadingMsg, #cardsLoadingMsg {
+        #loadingMsg, #cardsLoadingMsg, #barrioChartLoading {
             text-align: center;
             color: #666;
             font-size: 14px;
@@ -637,6 +637,117 @@
             width: 100%;
             height: 100%;
             border: none;
+        }
+
+        /* Comparador de Barrios */
+        .barrio-chart-section {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            margin-bottom: 60px;
+        }
+
+        .barrio-chart-heading {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .barrio-chart-heading h2 {
+            color: #5B8B8A;
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .barrio-chart-heading p {
+            color: #999;
+            font-size: 13px;
+        }
+
+        .barrio-chart-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .chip-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .chip {
+            border: 1px solid #d1d5db;
+            border-radius: 999px;
+            padding: 8px 18px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #666;
+            cursor: pointer;
+            user-select: none;
+            transition: 0.15s ease;
+            background: white;
+        }
+
+        .chip.active {
+            background: #5B8B8A;
+            color: white;
+            border-color: #5B8B8A;
+        }
+
+        .chip:hover:not(.active) {
+            border-color: #5B8B8A;
+            color: #5B8B8A;
+        }
+
+        .sort-toggle {
+            display: flex;
+            gap: 8px;
+        }
+
+        .sort-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #666;
+            cursor: pointer;
+            transition: 0.15s ease;
+            font-family: inherit;
+        }
+
+        .sort-btn.active {
+            background: #2c3e50;
+            color: white;
+            border-color: #2c3e50;
+        }
+
+        .sort-btn:hover:not(.active) {
+            border-color: #2c3e50;
+            color: #2c3e50;
+        }
+
+        .barrio-chart-canvas-wrap {
+            width: 100%;
+            position: relative;
+            transition: height 0.2s ease;
+        }
+
+        .barrio-sample-note {
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            margin-top: 16px;
+            font-style: italic;
         }
 
         /* Note Section */
@@ -899,6 +1010,30 @@
                     webkitallowfullscreen="true">
                 </iframe>
             </div>
+        </section>
+
+        <!-- Comparador de Barrios -->
+        <section class="barrio-chart-section">
+            <div class="barrio-chart-heading">
+                <h2>Diferencia de precios por Barrio</h2>
+                <p>Valor por m² cubierto, según tipo de propiedad</p>
+            </div>
+            <div class="barrio-chart-controls">
+                <div class="chip-group" id="tipoChips">
+                    <span class="chip active" data-tipo="Departamento">Departamentos</span>
+                    <span class="chip" data-tipo="PH">PHs</span>
+                    <span class="chip" data-tipo="Casa">Casas</span>
+                </div>
+                <div class="sort-toggle" id="sortToggle">
+                    <button type="button" class="sort-btn active" data-dir="desc">↓ Mayor a menor</button>
+                    <button type="button" class="sort-btn" data-dir="asc">↑ Menor a mayor</button>
+                </div>
+            </div>
+            <div id="barrioChartLoading">⏳ Calculando por barrio...</div>
+            <div class="barrio-chart-canvas-wrap hidden" id="barrioChartWrap">
+                <canvas id="barrioChart"></canvas>
+            </div>
+            <p class="barrio-sample-note" id="barrioSampleNote"></p>
         </section>
 
         <!-- Nota al pie -->
@@ -1201,11 +1336,136 @@
                 document.getElementById('cardCasaBody').innerText = 'Datos no disponibles por el momento.';
             }
 
-            // Terrenos: texto fijo (no hay suficiente volumen de datos de terrenos
-            // en la base todavía como para calcularlo en vivo de forma confiable).
+            // Terrenos: tarjeta con texto fijo (no hay datos de terrenos
+            // en la base de Supabase, se actualiza a mano si hace falta).
 
             document.getElementById('cardsLoadingMsg').style.display = 'none';
         }
+
+        // ==========================================
+        // Comparador de barrios: valor por m² cubierto, filtrable por tipo
+        // de propiedad y ordenable. Solo se muestran barrios que alcanzan
+        // una muestra mínima de publicaciones, para no graficar barrios
+        // con 1 o 2 propiedades cuyo promedio no es representativo.
+        // ==========================================
+        const MIN_PROPIEDADES_BARRIO = 8;
+        let barrioChart = null;
+        let datosBarrioChart = [];
+        let tipoBarrioChart = 'Departamento';
+        let ordenBarrioChart = 'desc';
+
+        function calcularDatosBarrio(tipo) {
+            const filtradas = datosBarrioChart.filter(r => etiquetaTipo(r.real_estate_type) === tipo && r.price_value > 0 && r.covered_area_m2 > 0);
+            const porBarrio = {};
+            filtradas.forEach(r => {
+                if (!r.barrio) return;
+                if (!porBarrio[r.barrio]) porBarrio[r.barrio] = { totalVal: 0, totalArea: 0, count: 0 };
+                porBarrio[r.barrio].totalVal += r.price_value;
+                porBarrio[r.barrio].totalArea += r.covered_area_m2;
+                porBarrio[r.barrio].count += 1;
+            });
+
+            let entries = Object.entries(porBarrio)
+                .filter(([, v]) => v.count >= MIN_PROPIEDADES_BARRIO)
+                .map(([barrio, v]) => ({ barrio, valorM2: v.totalVal / v.totalArea, count: v.count }));
+
+            entries.sort((a, b) => ordenBarrioChart === 'desc' ? b.valorM2 - a.valorM2 : a.valorM2 - b.valorM2);
+            return entries;
+        }
+
+        function renderBarrioChart() {
+            const entries = calcularDatosBarrio(tipoBarrioChart);
+            const loading = document.getElementById('barrioChartLoading');
+            const wrap = document.getElementById('barrioChartWrap');
+            const note = document.getElementById('barrioSampleNote');
+
+            if (entries.length === 0) {
+                wrap.classList.add('hidden');
+                loading.style.display = 'block';
+                loading.innerText = 'Todavía no hay barrios con muestra suficiente para esta categoría.';
+                note.innerText = '';
+                return;
+            }
+
+            loading.style.display = 'none';
+            wrap.classList.remove('hidden');
+
+            const barHeight = 32;
+            wrap.style.height = `${entries.length * barHeight + 40}px`;
+
+            const ctx = document.getElementById('barrioChart').getContext('2d');
+            const labels = entries.map(e => e.barrio);
+            const data = entries.map(e => Math.round(e.valorM2));
+
+            if (barrioChart) barrioChart.destroy();
+            barrioChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        data,
+                        backgroundColor: '#5B8B8A',
+                        borderRadius: 4,
+                        maxBarThickness: 22
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: { padding: { right: 46 } },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: { color: '#f0f0f0' },
+                            ticks: { callback: v => v.toLocaleString('es-AR') }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { font: { size: 12 } }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'right',
+                            color: '#333',
+                            font: { weight: 'bold', size: 11 },
+                            formatter: v => v.toLocaleString('es-AR')
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => ` USD ${ctx.parsed.x.toLocaleString('es-AR')}/m²`
+                            },
+                            backgroundColor: 'rgba(29, 110, 93, 0.95)',
+                            padding: 10,
+                            cornerRadius: 6
+                        }
+                    }
+                }
+            });
+
+            note.innerText = `Se muestran barrios con al menos ${MIN_PROPIEDADES_BARRIO} publicaciones de esta categoría.`;
+        }
+
+        document.getElementById('tipoChips').addEventListener('click', (e) => {
+            const chip = e.target.closest('.chip');
+            if (!chip) return;
+            document.querySelectorAll('#tipoChips .chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            tipoBarrioChart = chip.dataset.tipo;
+            renderBarrioChart();
+        });
+
+        document.getElementById('sortToggle').addEventListener('click', (e) => {
+            const btn = e.target.closest('.sort-btn');
+            if (!btn) return;
+            document.querySelectorAll('#sortToggle .sort-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            ordenBarrioChart = btn.dataset.dir;
+            renderBarrioChart();
+        });
 
         async function init() {
             try {
@@ -1218,6 +1478,9 @@
                 document.getElementById('dashboardContent').classList.remove('hidden');
 
                 renderCards(rawInput);
+
+                datosBarrioChart = rawInput;
+                renderBarrioChart();
             } catch (error) {
                 console.error('Error al cargar datos de Supabase:', error);
                 document.getElementById('loadingMsg').style.display = 'none';
