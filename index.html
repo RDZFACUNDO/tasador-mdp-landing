@@ -877,8 +877,12 @@
             <div class="property-card">
                 <img src="./images/Terreno.png" alt="Terrenos" loading="lazy">
                 <div class="card-content">
-                    <h3 id="cardTerrenoTitle"><span class="skeleton-line"></span></h3>
-                    <p id="cardTerrenoBody"><span class="skeleton-line"></span></p>
+                    <h3>El precio promedio de los terrenos es de $169/m²</h3>
+                    <p>
+                        El barrio con mayor cantidad de terrenos publicados es "Los Acantilados" con un
+                        precio medio de $58.367, seguido por "Las Sierras de los Padres" con un precio
+                        medio de $53.510.
+                    </p>
                 </div>
             </div>
         </div>
@@ -1146,9 +1150,7 @@
                 && r.covered_area_m2 >= 20 && r.covered_area_m2 < 1000;
         }
 
-        function renderCards(rawInputSinFiltrar) {
-            const rawInput = rawInputSinFiltrar.filter(dentroDeRango);
-
+        function renderCards(rawInput) {
             // --- Departamentos ---
             const deptos = rawInput.filter(r => etiquetaTipo(r.real_estate_type) === 'Departamento' && r.price_value > 0 && r.covered_area_m2 > 0);
             if (deptos.length > 0) {
@@ -1199,38 +1201,16 @@
                 document.getElementById('cardCasaBody').innerText = 'Datos no disponibles por el momento.';
             }
 
-            // --- Terrenos ---
-            const terrenos = rawInput.filter(r => /terreno|lote/i.test(r.real_estate_type || '') && r.price_value > 0 && r.covered_area_m2 > 0);
-            if (terrenos.length > 0) {
-                const pm2 = promedioPonderado(terrenos);
-                document.getElementById('cardTerrenoTitle').innerText = `El precio promedio de los terrenos es de USD ${formatCurrency(pm2)}/m²`;
-
-                const porBarrio = {};
-                terrenos.forEach(r => {
-                    if (!r.barrio) return;
-                    if (!porBarrio[r.barrio]) porBarrio[r.barrio] = { count: 0, totalVal: 0 };
-                    porBarrio[r.barrio].count += 1;
-                    porBarrio[r.barrio].totalVal += r.price_value;
-                });
-                const barrios = Object.entries(porBarrio).sort((a,b) => b[1].count - a[1].count);
-                if (barrios.length > 0) {
-                    const [nombre, info] = barrios[0];
-                    const precioMedio = info.totalVal / info.count;
-                    document.getElementById('cardTerrenoBody').innerText = `El barrio con mayor cantidad de terrenos publicados es "${nombre}" con un precio medio de USD ${formatCurrency(precioMedio)}.`;
-                } else {
-                    document.getElementById('cardTerrenoBody').innerText = '';
-                }
-            } else {
-                document.getElementById('cardTerrenoTitle').innerText = 'Terrenos';
-                document.getElementById('cardTerrenoBody').innerText = 'Datos no disponibles por el momento.';
-            }
+            // Terrenos: texto fijo (no hay suficiente volumen de datos de terrenos
+            // en la base todavía como para calcularlo en vivo de forma confiable).
 
             document.getElementById('cardsLoadingMsg').style.display = 'none';
         }
 
         async function init() {
             try {
-                const rawInput = await fetchTodasLasPropiedades();
+                const rawSinFiltrar = await fetchTodasLasPropiedades();
+                const rawInput = rawSinFiltrar.filter(dentroDeRango);
 
                 processData(rawInput);
                 initDashboard();
